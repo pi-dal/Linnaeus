@@ -9,7 +9,14 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from dohnuts.recipe import BASE_MODEL, DATA, TRAINING_STEPS, training_recipe
+from dohnuts.recipe import (
+    BASE_MODEL,
+    BASE_MODEL_ID,
+    BASE_REVISION,
+    DATA,
+    TRAINING_STEPS,
+    training_recipe,
+)
 from dohnuts.rlcd import RLCDConfig
 from dohnuts.train import file_hash
 
@@ -18,6 +25,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=DATA, help="Prepared mixture directory")
     parser.add_argument("--model", type=Path, default=BASE_MODEL, help="Local pinned backbone")
+    parser.add_argument(
+        "--base-repo",
+        default=BASE_MODEL_ID,
+        help="Hugging Face repo downloaded when --model lacks revision.txt",
+    )
+    parser.add_argument(
+        "--base-revision",
+        default=BASE_REVISION,
+        help="Pinned commit of --base-repo",
+    )
     parser.add_argument("--output", type=Path, default=Path("runs/v1"))
     parser.add_argument(
         "--steps", type=int, help="Total updates; extend a run without resetting it"
@@ -38,7 +55,13 @@ def main():
     steps = args.steps
     if steps is None:
         steps = previous["recipe"]["steps"] if previous else TRAINING_STEPS
-    recipe = training_recipe(model=args.model, data=args.data, rlcd=policy, steps=steps)
+    recipe = training_recipe(
+        model=args.model,
+        data=args.data,
+        rlcd=policy,
+        steps=steps,
+        base_model_id=args.base_repo,
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     logs = args.output / "logs"
     logs.mkdir(exist_ok=True)
@@ -73,9 +96,8 @@ def main():
     if not (args.model / "revision.txt").exists():
         from huggingface_hub import snapshot_download
 
-        revision = "2fc06364715b967f1860aea9cf38778875588b17"
-        snapshot_download("Qwen/Qwen3.5-0.8B", revision=revision, local_dir=args.model)
-        (args.model / "revision.txt").write_text(revision + "\n")
+        snapshot_download(args.base_repo, revision=args.base_revision, local_dir=args.model)
+        (args.model / "revision.txt").write_text(args.base_revision + "\n")
     if not all(
         (args.data / (split + ".jsonl")).exists()
         for split in ["train", "dev", "calibration", "test"]

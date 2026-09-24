@@ -171,7 +171,9 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
         frozen["initialized_from"] = parent
     if model.adapter.name != "qwen3.5":
         frozen["adapter"] = model.adapter.name
-        frozen["base_model"] = model.adapter.base_model
+    # Always record the base repo: same-family backbones (e.g. Qwen3.5-4B)
+    # share the adapter name, so it alone cannot identify the weights.
+    frozen["base_model"] = config.get("base_model_id", model.adapter.base_model)
     config_path = run / "config.json"
     previous = json.loads(config_path.read_text()) if config_path.exists() else None
     frozen["lr_decay_steps"] = (
@@ -481,6 +483,7 @@ def main():
         seed=config["seed"],
         rlcd=RLCDConfig(**config.get("rlcd", {})),
         steps=config["steps"],
+        base_model_id=config.get("base_model_id", "Qwen/Qwen3.5-0.8B"),
     )
     if config != expected:
         raise ValueError("Training uses the fixed recipe, RLCD controls, and step budget")

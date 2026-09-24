@@ -13,15 +13,26 @@ MAX_LENGTH = 2048
 TRAINING_STEPS = 3600
 LR_DECAY_STEPS = 2400
 BASE_MODEL = Path(".cache/models/Qwen3.5-0.8B")
+BASE_MODEL_ID = "Qwen/Qwen3.5-0.8B"
+BASE_REVISION = "2fc06364715b967f1860aea9cf38778875588b17"
 DATA = Path("data/processed/v1")
 
 
-def training_recipe(*, model=BASE_MODEL, data=DATA, seed=42, rlcd=None, steps=TRAINING_STEPS):
+def training_recipe(
+    *,
+    model=BASE_MODEL,
+    data=DATA,
+    seed=42,
+    rlcd=None,
+    steps=TRAINING_STEPS,
+    base_model_id=BASE_MODEL_ID,
+):
     if not isinstance(steps, int) or steps < 1:
         raise ValueError("Training steps must be a positive integer")
     policy = rlcd or RLCDConfig()
     recipe = {
         "model": str(model),
+        "base_model_id": base_model_id,
         "data": str(data),
         "seed": seed,
         "lora_rank": 8,
