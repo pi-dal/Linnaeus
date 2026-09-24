@@ -1,0 +1,73 @@
+name: Website
+
+on:
+  pull_request:
+    paths:
+      - "index.md"
+      - "README.md"
+      - "MODEL_CARD.md"
+      - "docs/**"
+      - "assets/dohnuts-logo.png"
+      - "results/**"
+      - "pyproject.toml"
+      - "pdm.lock"
+      - "pdm.toml"
+      - "Makefile"
+      - ".python-version"
+      - "LICENSE"
+      - "NOTICE"
+      - ".github/workflows/website.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.md"
+      - "README.md"
+      - "MODEL_CARD.md"
+      - "docs/**"
+      - "assets/dohnuts-logo.png"
+      - "results/**"
+      - "pyproject.toml"
+      - "pdm.lock"
+      - "pdm.toml"
+      - "Makefile"
+      - ".python-version"
+      - "LICENSE"
+      - "NOTICE"
+      - ".github/workflows/website.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.12"
+          version: "2.29.2"
+          cache: true
+      - run: make docs-install
+      - run: make docs
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

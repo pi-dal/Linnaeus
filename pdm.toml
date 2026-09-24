@@ -1,0 +1,2 @@
+# Package-to-index bindings are not required for the CUDA runtime.
+use_uv = false
