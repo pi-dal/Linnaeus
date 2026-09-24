@@ -128,7 +128,7 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
     random.seed(config["seed"])
     policy = RLCDConfig(**config.get("rlcd", {}))
     model = DecisionModel(config["model"], adapter=adapter)
-    model.enable_lora()
+    model.enable_lora(rank=config["lora_rank"])
     parent = None
     if initialize_from is not None:
         metadata = model.load_adapter(initialize_from)
@@ -365,7 +365,7 @@ def final_evaluation(config, run, *, adapter=None):
     model = DecisionModel(config["model"], adapter=adapter)
     if model.adapter.name != frozen.get("adapter", "qwen3.5"):
         raise ValueError("Evaluation adapter differs from the trained model")
-    model.enable_lora(checkpointing=False)
+    model.enable_lora(checkpointing=False, rank=frozen["lora_rank"])
     state = load_checkpoint(model, run / "best.pt")
     # Calibration and final evaluation use exactly the deployed merged model.
     model.merge()
@@ -484,6 +484,10 @@ def main():
         rlcd=RLCDConfig(**config.get("rlcd", {})),
         steps=config["steps"],
         base_model_id=config.get("base_model_id", "Qwen/Qwen3.5-0.8B"),
+        lora_rank=config["lora_rank"],
+        workers=config["workers"],
+        eval_batch_size=config["eval_batch_size"],
+        cpu_threads=config["cpu_threads"],
     )
     if config != expected:
         raise ValueError("Training uses the fixed recipe, RLCD controls, and step budget")

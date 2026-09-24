@@ -110,7 +110,7 @@ class Predictor:
                 )
         base_model = Path(base_model).expanduser()
         model = DecisionModel(base_model, adapter=adapter)
-        model.enable_lora(checkpointing=False)
+        model.enable_lora(checkpointing=False, rank=config["lora_rank"])
         config = model.load_adapter(directory)
         model.merge()
         predictor = cls(model)

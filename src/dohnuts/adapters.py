@@ -56,10 +56,10 @@ class Qwen35Adapter:
     def hidden_size(self, backbone):
         return backbone.config.text_config.hidden_size
 
-    def adapt_language(self, backbone, *, training):
+    def adapt_language(self, backbone, *, training, rank=8):
         config = LoraConfig(
-            r=8,
-            lora_alpha=16,
+            r=rank,
+            lora_alpha=rank * 2,
             lora_dropout=0.0,
             bias="none",
             target_modules=[

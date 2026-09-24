@@ -48,6 +48,19 @@ def main():
     parser.add_argument(
         "--ce-weight", type=float, default=1.0, help="Auxiliary cross-entropy weight"
     )
+    parser.add_argument(
+        "--lora-rank",
+        type=int,
+        default=8,
+        help="LoRA rank (alpha = 2x rank); changes trainable shapes, use a fresh --output",
+    )
+    parser.add_argument("--workers", type=int, default=2, help="DataLoader worker processes")
+    parser.add_argument(
+        "--eval-batch-size", type=int, default=16, help="Questions per evaluation batch"
+    )
+    parser.add_argument(
+        "--cpu-threads", type=int, default=8, help="Torch CPU threads for collation"
+    )
     args = parser.parse_args()
     policy = RLCDConfig(sigma=args.sigma, ce_weight=args.ce_weight)
     recipe_path = args.output / "recipe.json"
@@ -61,6 +74,10 @@ def main():
         rlcd=policy,
         steps=steps,
         base_model_id=args.base_repo,
+        lora_rank=args.lora_rank,
+        workers=args.workers,
+        eval_batch_size=args.eval_batch_size,
+        cpu_threads=args.cpu_threads,
     )
     args.output.mkdir(parents=True, exist_ok=True)
     logs = args.output / "logs"

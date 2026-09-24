@@ -37,6 +37,7 @@ class DecisionModel(nn.Module):
             dtype=torch.float32,
         )
         nn.init.normal_(self.head.weight, std=0.01)
+        self.lora_rank = 8
         self.marker_id = self.processor.tokenizer.convert_tokens_to_ids(self.adapter.marker)
         if self.processor.tokenizer.encode(self.adapter.marker, add_special_tokens=False) != [
             self.marker_id
@@ -51,8 +52,9 @@ class DecisionModel(nn.Module):
         rows = torch.arange(hidden.shape[0], device=hidden.device)[:, None]
         return self.head(hidden[rows, positions].float()).squeeze(-1)
 
-    def enable_lora(self, *, checkpointing=True):
-        self.adapter.adapt_language(self.backbone, training=checkpointing)
+    def enable_lora(self, *, checkpointing=True, rank=8):
+        self.lora_rank = rank
+        self.adapter.adapt_language(self.backbone, training=checkpointing, rank=rank)
 
     def load_adapter(self, directory):
         """Load the same verified unmerged weights for learning or deployment."""
@@ -66,7 +68,7 @@ class DecisionModel(nn.Module):
             or metadata.get("adapter", "qwen3.5") != self.adapter.name
             or metadata.get("base_revision") != model_revision(self.base_path)
             or (metadata["image_pixels"], metadata["max_length"], metadata["lora_rank"])
-            != (IMAGE_PIXELS, MAX_LENGTH, 8)
+            != (IMAGE_PIXELS, MAX_LENGTH, self.lora_rank)
             or hashlib.sha256(weights.read_bytes()).hexdigest() != metadata["weights_sha256"]
         ):
             raise ValueError(

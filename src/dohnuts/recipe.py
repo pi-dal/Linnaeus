@@ -26,6 +26,10 @@ def training_recipe(
     rlcd=None,
     steps=TRAINING_STEPS,
     base_model_id=BASE_MODEL_ID,
+    lora_rank=8,
+    workers=2,
+    eval_batch_size=16,
+    cpu_threads=8,
 ):
     if not isinstance(steps, int) or steps < 1:
         raise ValueError("Training steps must be a positive integer")
@@ -35,7 +39,7 @@ def training_recipe(
         "base_model_id": base_model_id,
         "data": str(data),
         "seed": seed,
-        "lora_rank": 8,
+        "lora_rank": lora_rank,
         "batch_size": 8,
         "accumulation": 4,
         "steps": steps,
@@ -45,9 +49,9 @@ def training_recipe(
         "dev_cap": 256,
         "image_pixels": IMAGE_PIXELS,
         "max_length": MAX_LENGTH,
-        "cpu_threads": 8,
-        "workers": 2,
-        "eval_batch_size": 16,
+        "cpu_threads": cpu_threads,
+        "workers": workers,
+        "eval_batch_size": eval_batch_size,
         "log_every": 10,
         "eval_every": 400,
         "save_every": 100,
