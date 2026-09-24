@@ -1,0 +1,65 @@
+# Linnaeus toolchain and project commands, managed by mise.
+# `mise install` provisions Python and uv; `mise run <task>` executes commands.
+
+[tools]
+python = "3.12"
+uv = "0.11"
+
+# --- environment sync -------------------------------------------------------
+# `uv sync` replaces the environment with exactly the requested selection, so
+# each sync task is a complete, standalone install for its purpose.
+
+[tasks.install]
+description = "Install locked runtime, training, agent, telemetry, and quality dependencies"
+run = "uv sync --extra train --extra agent --extra telemetry --group quality"
+
+[tasks.sync-quality]
+description = "Install only lint/typecheck tools (no PyTorch; used by the quality CI job)"
+run = "uv sync --no-default-groups --group quality --no-install-project"
+
+[tasks.sync-docs]
+description = "Install only the documentation group (no project or model dependencies)"
+run = "uv sync --no-default-groups --group docs --no-install-project"
+
+# --- project commands -------------------------------------------------------
+# Tasks assume the environment is already synced (mise run install); --no-sync
+# keeps uv from silently re-resolving a different dependency selection.
+
+[tasks.lock]
+description = "Resolve all extras and groups for the locked Python 3.12 environment"
+run = "uv lock"
+
+[tasks.lint]
+description = "Verify the lock, repository hygiene, and Python lint/formatting"
+run = [
+  "uv lock --check",
+  "uv run --no-sync prek run --all-files",
+  "uv run --no-sync ruff check .",
+  "uv run --no-sync ruff format --check .",
+]
+
+[tasks.check]
+description = "Run all quality checks, including types against installed dependencies"
+depends = ["lint"]
+run = "uv run --no-sync ty check src"
+
+[tasks.format]
+description = "Format Python code"
+run = "uv run --no-sync ruff format ."
+
+[tasks.test]
+description = "Run pytest without loading model weights"
+run = "uv run --no-sync pytest"
+
+[tasks.build]
+description = "Build the source distribution and wheel"
+run = "uv build"
+
+[tasks.docs]
+description = "Build the static website with warnings treated as errors"
+run = "uv run --no-sync sphinx-build -b html -W --keep-going -d build/doctrees -c docs . build/site"
+
+[tasks.docs-preview]
+description = "Build and serve the website on localhost:8000"
+depends = ["docs"]
+run = "python -m http.server 8000 --bind 127.0.0.1 --directory build/site"

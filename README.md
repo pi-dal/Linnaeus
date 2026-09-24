@@ -14,14 +14,17 @@ same recipe to CUDA servers:
 - VRAM allocator cap is configurable: `LINNAEUS_VRAM_FRACTION` (default `0.8`;
   use `0.95` on headless servers)
 - GPU telemetry auto-detects the DRM device and falls back to NVML
-  (`pdm install -G telemetry`); override with `LINNAEUS_GPU_DEVICE` /
+  (`uv sync --extra telemetry`); override with `LINNAEUS_GPU_DEVICE` /
   `LINNAEUS_GPU_INDEX`
 - Linux + CUDA only; macOS is not a supported runtime
 
+Toolchain and commands are managed by [mise](https://mise.jdx.dev/)
+(`mise.toml`): `mise install` provisions Python 3.12 + uv, `mise tasks` lists
+all commands.
+
 ```bash
-pdm use 3.12
-pdm install --check --prod -G train -G telemetry
-LINNAEUS_VRAM_FRACTION=0.95 pdm run python scripts/run_experiment.py
+mise install && mise run install
+LINNAEUS_VRAM_FRACTION=0.95 uv run python scripts/run_experiment.py
 ```
 
 On hosts without direct Hugging Face access: `export HF_ENDPOINT=https://hf-mirror.com`.
@@ -76,7 +79,7 @@ One workflow prepares the public-data mixture, trains with joint RLCD and
 cross-entropy, selects a checkpoint, calibrates it, and runs the evaluations:
 
 ```bash
-pdm run python scripts/run_experiment.py
+uv run python scripts/run_experiment.py
 ```
 
 The [training guide](docs/run-experiment.md) covers setup and resuming a run.

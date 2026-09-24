@@ -34,7 +34,7 @@ pinned at `e105a48f8cdb7f3babb3594424f73e5d7bdc97b9`. Its public tasks contain
 534-item leaderboard are not distributed, including the entire judge tier.
 
 ```bash
-pdm run python scripts/run_jevbench.py
+uv run python scripts/run_jevbench.py
 ```
 
 Each task receives one serial `Predictor.predict` call with its original state,
@@ -61,9 +61,9 @@ measurements in its comparison chart. Run them on the exported Dohnuts checkpoin
 ```bash
 git clone --branch research https://github.com/NandhaKishorM/laya.git .cache/upstream/laya-research
 git -C .cache/upstream/laya-research checkout --detach 28d43add7e47ce502489c9433310d55276c64e0f
-pdm install --check --prod -G train
-pdm run python scripts/prepare_laya_benchmark.py
-pdm run python scripts/run_laya_benchmark.py
+uv sync --extra train
+uv run python scripts/prepare_laya_benchmark.py
+uv run python scripts/run_laya_benchmark.py
 ```
 
 Preparation preserves the upstream builders, seed 13, candidate order, and
@@ -106,8 +106,8 @@ Install the locked plotting group, then render the completed run. This group
 does not require model dependencies:
 
 ```bash
-pdm install --check --no-default --no-self -G plot
-pdm run python scripts/plot_model_card.py --run runs/v1
+uv sync --no-default-groups --group plot --no-install-project
+uv run python scripts/plot_model_card.py --run runs/v1
 ```
 
 `runs/v1/figures/README.md` indexes the PNG, SVG and PDF figures. The directory

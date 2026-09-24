@@ -8,7 +8,7 @@ to provide one batch decision tool and persistent session tapes.
 Follow the [runtime and checkpoint setup](inference.md) first.
 
 ```bash
-pdm install --check --prod -G agent
+uv sync --extra agent
 ```
 
 ```python

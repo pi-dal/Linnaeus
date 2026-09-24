@@ -10,9 +10,8 @@ on:
       - "assets/dohnuts-logo.png"
       - "results/**"
       - "pyproject.toml"
-      - "pdm.lock"
-      - "pdm.toml"
-      - "Makefile"
+      - "uv.lock"
+      - "mise.toml"
       - ".python-version"
       - "LICENSE"
       - "NOTICE"
@@ -27,9 +26,8 @@ on:
       - "assets/dohnuts-logo.png"
       - "results/**"
       - "pyproject.toml"
-      - "pdm.lock"
-      - "pdm.toml"
-      - "Makefile"
+      - "uv.lock"
+      - "mise.toml"
       - ".python-version"
       - "LICENSE"
       - "NOTICE"
@@ -44,13 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: "3.12"
-          version: "2.29.2"
-          cache: true
-      - run: make docs-install
-      - run: make docs
+      - uses: jdx/mise-action@v3
+      - run: mise run sync-docs
+      - run: mise run docs
       - uses: actions/upload-pages-artifact@v4
         with:
           path: build/site

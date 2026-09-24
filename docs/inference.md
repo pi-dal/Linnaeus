@@ -2,21 +2,21 @@
 
 The Linnaeus runtime uses Python 3.12 and PyTorch 2.9.1 with CUDA 12.8 on an
 NVIDIA GPU (Ampere or newer for BF16). Upstream measured ROCm 6.4 on an
-AMD Radeon RX 7900 XTX. Install [PDM](https://pdm-project.org/en/latest/#installation)
-2.29.2 or a newer 2.x release, then install from source:
+AMD Radeon RX 7900 XTX. Install [mise](https://mise.jdx.dev/) (it provisions
+Python 3.12 and uv from `mise.toml`), then install from source:
 
 ```bash
 git clone <linnaeus-remote>
 cd Linnaeus
-pdm use 3.12
-pdm install --check --prod
+mise install
+uv sync
 ```
 
-The lock file targets Python 3.12. The package sources in `pyproject.toml` bind
-PyTorch and torchvision to the CUDA 12.8 index; Triton resolves from PyPI.
-Keep PDM's native resolver enabled: its experimental uv resolver does not support
-these package-to-index bindings. See [development](development.md) for dependency
-groups, checks, and updating the lock.
+The lock file targets Python 3.12 on Linux (`required-environments`). The
+`tool.uv.sources` entries in `pyproject.toml` bind PyTorch and torchvision to
+the explicit CUDA 12.8 index; Triton resolves from PyPI.
+See [development](development.md) for dependency groups, checks, and updating
+the lock.
 
 ## Load a checkpoint
 
@@ -25,7 +25,7 @@ decision weights and the exact Qwen3.5-0.8B revision recorded in the checkpoint.
 Downloads use the Hugging Face cache and are reused by later calls. Both
 repositories are public; downloading them does not require a Hugging Face login.
 
-Run Python examples with `pdm run python` from the repository root:
+Run Python examples with `uv run python` from the repository root:
 
 ```python
 from dohnuts.predictor import Predictor

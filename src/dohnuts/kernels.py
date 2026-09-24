@@ -4,7 +4,7 @@ from types import MethodType
 
 
 def fused_rms_norm(module, hidden):
-    from fla.modules.layernorm import rms_norm
+    from fla.modules.layernorm import rms_norm  # ty: ignore[unresolved-import]
 
     # FLA 0.5.2 accepts bias=None, but its annotation omits None.
     return rms_norm(
@@ -16,7 +16,9 @@ def fused_rms_norm(module, hidden):
 
 
 def fused_gated_norm(module, hidden, gate):
-    from fla.modules.fused_norm_gate import rms_norm_gated
+    from fla.modules.fused_norm_gate import (  # ty: ignore[unresolved-import]
+        rms_norm_gated,
+    )
 
     # FLA 0.5.2 accepts bias=None, but its annotation omits None.
     return rms_norm_gated(
@@ -29,7 +31,7 @@ def fused_gated_norm(module, hidden, gate):
 
 
 def fused_mlp(module, hidden):
-    from fla.modules.activations import swiglu
+    from fla.modules.activations import swiglu  # ty: ignore[unresolved-import]
 
     # Keep the projection modules in the graph: they own the trainable LoRA.
     return module.down_proj(swiglu(module.gate_proj(hidden), module.up_proj(hidden)))
@@ -79,7 +81,7 @@ def enable_linear_patch_embedding(visual):
 
 
 def triton_causal_conv1d(hidden_states, weight, bias=None, activation=None, **kwargs):
-    from fla.modules.conv import causal_conv1d
+    from fla.modules.conv import causal_conv1d  # ty: ignore[unresolved-import]
 
     # FLA's input_guard decorator exposes a Tensor/callable union for this function.
     output, _ = causal_conv1d(  # ty: ignore[call-non-callable]

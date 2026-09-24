@@ -2,4 +2,4 @@
 
 from importlib.metadata import version
 
-__version__ = version("dohnuts")
+__version__ = version("linnaeus")

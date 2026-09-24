@@ -58,7 +58,7 @@ The figures are available as SVG. Captions document each evaluation protocol. On
 Follow the [plotting setup](../local-benchmarks.md#model-card-figures), then run from the repository root:
 
 ```sh
-pdm run python scripts/plot_model_card.py --run runs/v1
+uv run python scripts/plot_model_card.py --run runs/v1
 ```
 
 The command writes PNG, SVG, and PDF figures to the experiment output directory.

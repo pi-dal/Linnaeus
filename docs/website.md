@@ -5,17 +5,16 @@ search index, Furo supplies navigation and responsive layouts, and MyST reads
 the existing Markdown. The site uses the README, model card, guides, and saved
 figures directly; do not maintain separate copies of their content.
 
-From the repository root, with [PDM](https://pdm-project.org/en/latest/#installation)
-2.29.2 or a newer 2.x release and Python 3.12:
+From the repository root, with [mise](https://mise.jdx.dev/) installed:
 
 ```bash
-pdm use 3.12
-make docs-install
-make docs-preview
+mise install
+mise run sync-docs
+mise run docs-preview
 ```
 
 Open `http://localhost:8000`. The generated files are in `build/site`.
-`make docs-install` selects only the `docs` group from `pdm.lock`, without
+`mise run sync-docs` selects only the `docs` group from `uv.lock`, without
 installing the project or its model dependencies. The build does not import Dohnuts,
 execute the examples, load models, train, or download datasets.
 
@@ -23,7 +22,7 @@ Keep navigation in the existing MyST `toctree` directives. Use `docs/conf.py`
 for theme settings and `docs/_static/brand.css` for small styling changes.
 Keep the existing logo and published figures as the visual sources.
 
-Use `make docs` for a build without the preview server. Dependency versions and
+Use `mise run docs` for a build without the preview server. Dependency versions and
 commands live in `pyproject.toml`; see [development](development.md) for checks
 and lock updates.
 

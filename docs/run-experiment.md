@@ -3,12 +3,12 @@
 Use Python 3.12 and a working PyTorch installation on a CUDA GPU
 (Linnaeus targets NVIDIA; upstream recorded ROCm on an RX 7900 XTX).
 The recorded upstream training environment is preserved in
-`data/manifests/environment-freeze.txt`. Follow the [PDM setup](inference.md)
+`data/manifests/environment-freeze.txt`. Follow the [setup](inference.md)
 first; the package sources and lock file select the `+cu128` wheels.
 
 ```bash
-pdm install --check --prod -G train -G telemetry
-pdm run python scripts/run_experiment.py
+uv sync --extra train --extra telemetry
+uv run python scripts/run_experiment.py
 ```
 
 The Qwen3.5 adapter limits PyTorch's caching allocator to 80% of visible VRAM
@@ -51,7 +51,7 @@ Base initialization and checkpoint initialization use the same 26-group mixture
 and training workflow. To initialize from an exported checkpoint:
 
 ```bash
-pdm run python scripts/run_experiment.py --initialize-from runs/v1/checkpoint --output runs/domain
+uv run python scripts/run_experiment.py --initialize-from runs/v1/checkpoint --output runs/domain
 ```
 
 The checkpoint supplies the starting parameters and a fresh optimizer/schedule.

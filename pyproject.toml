@@ -1,6 +1,6 @@
 [build-system]
-requires = ["pdm-backend>=2.4,<3"]
-build-backend = "pdm.backend"
+requires = ["uv_build>=0.8,<0.9"]
+build-backend = "uv_build"
 
 [project]
 name = "linnaeus"
@@ -19,7 +19,9 @@ dependencies = [
   "peft>=0.21,<0.22",
   "Pillow>=11",
   "huggingface-hub>=1.0,<2",
-  "flash-linear-attention==0.5.2",
+  # Triton has no macOS wheels; FLA is imported lazily inside kernel functions,
+  # so the package still installs and CPU tests run on macOS without it.
+  "flash-linear-attention==0.5.2; sys_platform == 'linux'",
 ]
 
 [project.optional-dependencies]
@@ -37,46 +39,40 @@ plot = ["matplotlib==3.11.2", "numpy==2.5.3"]
 Upstream = "https://github.com/PsiACE/dohnuts"
 Models = "https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B"
 
-[tool.pdm]
-distribution = true
-requires-pdm = ">=2.29.2,<3"
-
-[tool.pdm.build]
-package-dir = "src"
-includes = ["src/dohnuts"]
-source-includes = [
-  "tests", "scripts", "docs", "results", "assets/dohnuts-logo.png",
-  "MODEL_CARD.md", "index.md", "Makefile", "NOTICE", "pdm.lock", "pdm.toml",
-  ".python-version", ".pre-commit-config.yaml",
+[tool.uv]
+package = true
+# Linux x86_64/aarch64 get the +cu128 CUDA wheels; macOS gets PyPI builds for
+# local CPU-only development (lint, typecheck, tests). Training/inference
+# still requires a CUDA host.
+required-environments = [
+  "sys_platform == 'linux'",
+  "sys_platform == 'darwin'",
 ]
+
+[tool.uv.build-backend]
+module-name = "dohnuts"
+module-root = "src"
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 
 # NVIDIA runtime: torch/torchvision resolve as +cu128 builds from the official
 # PyTorch index. Switch cu128 to another toolkit index (e.g. cu126/cu130) if the
 # host driver requires it.
-[[tool.pdm.source]]
-name = "pypi"
-url = "https://pypi.org/simple"
-exclude_packages = ["torch", "torchvision"]
-
-[[tool.pdm.source]]
+[[tool.uv.index]]
 name = "pytorch-cu128"
 url = "https://download.pytorch.org/whl/cu128"
-include_packages = ["torch", "torchvision"]
-exclude_packages = ["*"]
-
-[tool.pdm.scripts]
-lint = "ruff check ."
-format = "ruff format ."
-format-check = "ruff format --check ."
-typecheck = "ty check src"
-check = { composite = ["lint", "format-check", "typecheck"] }
-test = "pytest"
-docs = "sphinx-build -b html -W --keep-going -d build/doctrees -c docs . build/site"
-docs-serve = "python -m http.server 8000 --bind 127.0.0.1 --directory build/site"
+explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--strict-config", "--strict-markers"]
+
+[tool.ty.rules]
+# fla is a Linux-only dependency; its ty: ignore comments in kernels.py are
+# platform-conditional by design, so unused-ignore noise is expected.
+unused-ignore-comment = "ignore"
 
 [tool.ruff]
 target-version = "py312"
