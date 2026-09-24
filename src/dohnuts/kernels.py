@@ -1,5 +1,6 @@
 """Fused differentiable Qwen operations shared by training and inference."""
 
+import os
 from types import MethodType
 
 
@@ -83,13 +84,16 @@ def enable_linear_patch_embedding(visual):
 def triton_causal_conv1d(hidden_states, weight, bias=None, activation=None, **kwargs):
     from fla.modules.conv import causal_conv1d  # ty: ignore[unresolved-import]
 
+    # LINNAEUS_CONV_BACKEND=cuda A/B-tests the native causal-conv1d package path
+    # on NVIDIA hosts; triton is the validated default from the recorded run.
+    backend = os.environ.get("LINNAEUS_CONV_BACKEND", "triton")
     # FLA's input_guard decorator exposes a Tensor/callable union for this function.
     output, _ = causal_conv1d(  # ty: ignore[call-non-callable]
         hidden_states.transpose(1, 2),
         weight=weight,
         bias=bias,
         activation=activation,
-        backend="triton",
+        backend=backend,
         output_final_state=False,
         cu_seqlens=kwargs.get("cu_seq_lens_q"),
     )

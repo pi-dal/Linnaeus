@@ -110,6 +110,10 @@ def main():
     # The ROCm-only AOTriton flag is set inside Qwen35Adapter when HIP is present.
     env.setdefault("CUDA_VISIBLE_DEVICES", "0")
     env.setdefault("ROCR_VISIBLE_DEVICES", "0")
+    # Variable-length batches fragment the caching allocator over thousands of
+    # steps; expandable segments trade a little overhead for far less
+    # fragmentation-driven OOM/slowdown on long runs.
+    env.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     import importlib.util
 
     if importlib.util.find_spec("hf_transfer"):
