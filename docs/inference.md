@@ -1,18 +1,19 @@
 # Installation and inference
 
-The measured runtime uses Python 3.12, PyTorch 2.9.1 with ROCm 6.4, and an
+The Linnaeus runtime uses Python 3.12 and PyTorch 2.9.1 with CUDA 12.8 on an
+NVIDIA GPU (Ampere or newer for BF16). Upstream measured ROCm 6.4 on an
 AMD Radeon RX 7900 XTX. Install [PDM](https://pdm-project.org/en/latest/#installation)
 2.29.2 or a newer 2.x release, then install from source:
 
 ```bash
-git clone https://github.com/PsiACE/dohnuts.git
-cd dohnuts
+git clone <linnaeus-remote>
+cd Linnaeus
 pdm use 3.12
 pdm install --check --prod
 ```
 
 The lock file targets Python 3.12. The package sources in `pyproject.toml` bind
-PyTorch, torchvision, and PyTorch's Triton runtime to the ROCm 6.4 index.
+PyTorch and torchvision to the CUDA 12.8 index; Triton resolves from PyPI.
 Keep PDM's native resolver enabled: its experimental uv resolver does not support
 these package-to-index bindings. See [development](development.md) for dependency
 groups, checks, and updating the lock.

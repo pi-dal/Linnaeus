@@ -13,7 +13,7 @@ import torch
 
 from dohnuts import __version__
 from dohnuts.adapters import Qwen35Adapter
-from dohnuts.experiment import Sampler, environment, memory
+from dohnuts.experiment import Sampler, detect_gpu_device, environment, memory
 from dohnuts.predictor import Predictor
 from dohnuts.train import file_hash
 
@@ -316,7 +316,7 @@ def main():
         default_reserve_usd=0,
     )
     torch.cuda.reset_peak_memory_stats()
-    with Sampler(Path("/sys/class/drm/card1/device"), interval=0.1) as sampler:
+    with Sampler(detect_gpu_device(), interval=0.1) as sampler:
         records = runner.run_all(tasks, results_path=args.output / "results.jsonl")
     runtime["inference_memory"] = memory()
     if len(records) != len(tasks):

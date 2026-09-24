@@ -16,8 +16,44 @@ from dohnuts.model import DecisionModel, model_revision
 GIB = 1024**3
 
 
+def detect_gpu_device() -> Path:
+    """Locate the sysfs DRM device that exposes GPU telemetry.
+
+    Upstream hardcoded /sys/class/drm/card1/device, which only matches the
+    author's AMD desktop. Honor LINNAEUS_GPU_DEVICE first, then scan for a
+    card exposing AMD's mem_info_vram_used. NVIDIA hosts usually have no such
+    card; the returned nonexistent path makes Sampler fall back to NVML/RSS.
+    """
+    override = os.environ.get("LINNAEUS_GPU_DEVICE")
+    if override:
+        return Path(override)
+    for device in sorted(Path("/sys/class/drm").glob("card*/device")):
+        if (device / "mem_info_vram_used").exists():
+            return device
+    return Path("/sys/class/drm/card0/device")
+
+
+def _nvml_handle(index: int = 0):
+    """Return an initialized NVML device handle, or None when unavailable."""
+    try:
+        import pynvml
+    except ImportError:
+        return None
+    try:
+        pynvml.nvmlInit()
+        return pynvml, pynvml.nvmlDeviceGetHandleByIndex(
+            int(os.environ.get("LINNAEUS_GPU_INDEX", index))
+        )
+    except Exception:
+        return None
+
+
 class Sampler:
-    """Sample board memory/utilization/power and process RSS every 20 ms."""
+    """Sample board memory/utilization/power and process RSS every 20 ms.
+
+    AMD boards are read from sysfs; on NVIDIA hosts the same field names and
+    units are served through NVML when nvidia-ml-py is installed.
+    """
 
     def __init__(self, device: Path, interval: float = 0.02, *, output=None):
         self.device = device
@@ -29,6 +65,7 @@ class Sampler:
         self.thread = threading.Thread(target=self.run, daemon=True)
         hwmons = list((device / "hwmon").glob("hwmon*"))
         self.hwmon = hwmons[0] if hwmons else None
+        self.nvml = None if (device / "mem_info_vram_used").exists() else _nvml_handle()
 
     def read(self):
         values = {}
@@ -46,6 +83,18 @@ class Sampler:
         for name, path in fields.items():
             if path.exists():
                 values[name] = int(path.read_text().strip())
+        if self.nvml and "board_vram_bytes" not in values:
+            pynvml, handle = self.nvml
+            try:
+                info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                values["board_vram_bytes"] = info.used
+                values["gpu_busy_percent"] = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
+                values["power_microwatts"] = pynvml.nvmlDeviceGetPowerUsage(handle) * 1000
+                values["temperature_millidegrees"] = (
+                    pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU) * 1000
+                )
+            except Exception:
+                pass
         for line in Path("/proc/self/status").read_text().splitlines():
             if line.startswith("VmRSS:"):
                 values["rss_bytes"] = int(line.split()[1]) * 1024
@@ -137,13 +186,14 @@ def environment(model: DecisionModel, checkpoint: Path):
         "platform": platform.platform(),
         "python": platform.python_version(),
         "versions": {
-            name: importlib.metadata.version(name)
+            name: _package_version(name)
             for name in [
                 "torch",
                 "torchvision",
                 "transformers",
                 "peft",
                 "pytorch-triton-rocm",
+                "triton",
                 "flash-linear-attention",
                 "fla-core",
             ]
@@ -158,7 +208,7 @@ def environment(model: DecisionModel, checkpoint: Path):
         "dtype": str(next(model.backbone.parameters()).dtype),
         "kernel_flags": {
             "linear_patch": True,
-            "triton_convolution": bool(torch.version.hip),
+            "triton_convolution": True,
             "fused_norm_and_swiglu": True,
             "shared_prefix": True,
             "frozen_vision_cache_MiB": 128,
@@ -167,5 +217,13 @@ def environment(model: DecisionModel, checkpoint: Path):
         },
         "threads": torch.get_num_threads(),
         "memory": memory(),
-        "visible_devices": os.environ.get("ROCR_VISIBLE_DEVICES"),
+        "visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES")
+        or os.environ.get("ROCR_VISIBLE_DEVICES"),
     }
+
+
+def _package_version(name: str):
+    try:
+        return importlib.metadata.version(name)
+    except importlib.metadata.PackageNotFoundError:
+        return None

@@ -9,10 +9,12 @@ readme = "README.md"
 description = "NVIDIA-optimized fork of Dohnuts: small multimodal models for direct decisions."
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 dependencies = [
-  "torch>=2.9",
-  "torchvision>=0.24",
+  # Pinned to the recorded upstream runtime (2.9.1 / 0.24.x); the CUDA build
+  # comes from the pytorch-cu128 index bound below.
+  "torch==2.9.1",
+  "torchvision==0.24.1",
   "transformers>=5.17,<5.18",
   "peft>=0.21,<0.22",
   "Pillow>=11",
@@ -22,6 +24,8 @@ dependencies = [
 
 [project.optional-dependencies]
 train = ["pyarrow>=25", "scikit-learn>=1.9", "pandas>=3.0", "datasets>=4"]
+# NVML board telemetry on NVIDIA hosts; without it Sampler still records RSS.
+telemetry = ["nvidia-ml-py>=12"]
 agent = ["bub @ git+https://github.com/bubbuild/bub.git@9bf70488e22a44eeb875a9d55d9a7d352b82e381"]
 
 [dependency-groups]
@@ -46,9 +50,19 @@ source-includes = [
   ".python-version", ".pre-commit-config.yaml",
 ]
 
-# NVIDIA runtime: torch/torchvision resolve from PyPI, whose Linux x86_64 wheels
-# ship CUDA + Triton. Pin an explicit CUDA index here if a specific toolkit is
-# required, e.g. https://download.pytorch.org/whl/cu128.
+# NVIDIA runtime: torch/torchvision resolve as +cu128 builds from the official
+# PyTorch index. Switch cu128 to another toolkit index (e.g. cu126/cu130) if the
+# host driver requires it.
+[[tool.pdm.source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+exclude_packages = ["torch", "torchvision"]
+
+[[tool.pdm.source]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+include_packages = ["torch", "torchvision"]
+exclude_packages = ["*"]
 
 [tool.pdm.scripts]
 lint = "ruff check ."

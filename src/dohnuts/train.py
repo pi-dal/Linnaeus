@@ -14,7 +14,7 @@ from typing import cast
 import torch
 
 from dohnuts import __version__
-from dohnuts.experiment import Sampler, emit, environment, memory
+from dohnuts.experiment import Sampler, detect_gpu_device, emit, environment, memory
 from dohnuts.metrics import by_dataset, by_primitive_and_candidates, fit_temperatures
 from dohnuts.model import DecisionModel
 from dohnuts.recipe import LR_DECAY_STEPS, training_recipe
@@ -268,9 +268,7 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
             if previous.get("kind") == "train" and previous["step"] <= step:
                 consumed = Counter(previous["consumed"])
                 elapsed_before_resume = previous["elapsed_s"]
-    with Sampler(
-        Path("/sys/class/drm/card1/device"), interval=1.0, output=run / "resources.jsonl"
-    ) as telemetry:
+    with Sampler(detect_gpu_device(), interval=1.0, output=run / "resources.jsonl") as telemetry:
         while step < config["steps"]:
             model.train()
             optimizer.zero_grad(set_to_none=True)

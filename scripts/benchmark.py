@@ -10,7 +10,14 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from dohnuts.experiment import Sampler, emit, latency_stats, memory, timed
+from dohnuts.experiment import (
+    Sampler,
+    detect_gpu_device,
+    emit,
+    latency_stats,
+    memory,
+    timed,
+)
 
 
 def image_workloads():
@@ -111,7 +118,7 @@ def measure(args, agent, engine_label):
         operation = partial(agent.predict, state, questions)
         cold = timed(operation, 1)[0]
         timed(operation, 3)
-        with Sampler(Path("/sys/class/drm/card1/device")) as sampler:
+        with Sampler(detect_gpu_device()) as sampler:
             durations = timed(operation, 20)
         result = operation()
         if args.engine == "dohnuts":

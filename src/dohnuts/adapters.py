@@ -31,12 +31,18 @@ class Qwen35Adapter:
             enable_triton_convolution,
         )
 
-        # The desktop shares this GPU. Bound the caching allocator so a sequence
-        # of evaluation shapes cannot retain nearly all VRAM and crash the compositor.
-        torch.cuda.set_per_process_memory_fraction(0.8)
+        # Bound the caching allocator so a sequence of evaluation shapes cannot
+        # retain nearly all VRAM. On a headless server raise it, e.g.
+        # LINNAEUS_VRAM_FRACTION=0.95; upstream kept 0.8 for a shared desktop.
+        fraction = float(os.environ.get("LINNAEUS_VRAM_FRACTION", "0.8"))
+        torch.cuda.set_per_process_memory_fraction(fraction)
         if torch.version.hip:
             os.environ.setdefault("TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL", "1")
-            enable_triton_convolution()
+        # FLA's Triton causal conv runs on both ROCm and CUDA. Upstream gated it
+        # to HIP because NVIDIA could fall back to the causal-conv1d package;
+        # the Triton path is already validated by the recorded run, so use it
+        # everywhere and drop the extra native dependency.
+        enable_triton_convolution()
         backbone = AutoModel.from_pretrained(
             checkpoint, dtype=torch.bfloat16, attn_implementation="sdpa", local_files_only=True
         ).to("cuda")

@@ -44,12 +44,14 @@ def main():
     logs.mkdir(exist_ok=True)
     env = {
         **os.environ,
-        "ROCR_VISIBLE_DEVICES": "0",
-        "TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL": "1",
         "TRITON_CACHE_DIR": str(Path(".cache/triton").resolve()),
         "HF_HOME": str(Path(".cache/hf").resolve()),
         "TOKENIZERS_PARALLELISM": "false",
     }
+    # Default to device 0 without overriding an operator's explicit selection.
+    # The ROCm-only AOTriton flag is set inside Qwen35Adapter when HIP is present.
+    env.setdefault("CUDA_VISIBLE_DEVICES", "0")
+    env.setdefault("ROCR_VISIBLE_DEVICES", "0")
     completed = args.output / "completed.json"
     done = json.loads(completed.read_text()) if completed.exists() else {}
 

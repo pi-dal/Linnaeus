@@ -17,7 +17,14 @@ import numpy as np
 import torch
 from prepare_laya_benchmark import REVISION, SOURCE, UPSTREAM, digest
 
-from dohnuts.experiment import Sampler, environment, latency_stats, memory, timed
+from dohnuts.experiment import (
+    Sampler,
+    detect_gpu_device,
+    environment,
+    latency_stats,
+    memory,
+    timed,
+)
 from dohnuts.predictor import QTYPES, Predictor
 
 CHECKPOINT = Path("runs/v1/checkpoint")
@@ -141,7 +148,7 @@ def performance(predictor):
     import bench_latency
 
     result = {}
-    with Sampler(Path("/sys/class/drm/card1/device")) as sampler:
+    with Sampler(detect_gpu_device()) as sampler:
         for count in [1, 5, 10, 50]:
             questions = bench_latency.qs(count)
             for _ in range(3):

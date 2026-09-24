@@ -1,17 +1,18 @@
 # Train and evaluate Dohnuts
 
-Use Python 3.12 and a working PyTorch ROCm installation on the RX 7900 XTX.
-The recorded training environment is preserved in
+Use Python 3.12 and a working PyTorch installation on a CUDA GPU
+(Linnaeus targets NVIDIA; upstream recorded ROCm on an RX 7900 XTX).
+The recorded upstream training environment is preserved in
 `data/manifests/environment-freeze.txt`. Follow the [PDM setup](inference.md)
-first; the package sources and lock file select the ROCm wheels.
+first; the package sources and lock file select the `+cu128` wheels.
 
 ```bash
-pdm install --check --prod -G train -G agent
+pdm install --check --prod -G train -G telemetry
 pdm run python scripts/run_experiment.py
 ```
 
-The Qwen3.5 adapter limits PyTorch's caching allocator to 80% of visible VRAM,
-leaving headroom for the desktop and GPU driver on a shared workstation.
+The Qwen3.5 adapter limits PyTorch's caching allocator to 80% of visible VRAM
+by default. On a headless server, raise it with `LINNAEUS_VRAM_FRACTION=0.95`.
 
 The script downloads the pinned base and public datasets when absent, converts
 the complete mixture, isolates related examples and identical images across

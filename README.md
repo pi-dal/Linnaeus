@@ -1,8 +1,32 @@
 <img src="assets/dohnuts-logo.png" width="160" align="right" alt="A pink-frosted doughnut doing a facepalm">
 
-# Dohnuts
+# Linnaeus
 
-**D'oh! But dohnuts.**
+**NVIDIA-optimized fork of [Dohnuts](https://github.com/PsiACE/dohnuts).**
+
+Upstream trains and evaluates on AMD ROCm (RX 7900 XTX). Linnaeus retargets the
+same recipe to CUDA servers:
+
+- torch/torchvision pinned to `+cu128` builds via a dedicated package index
+  (`pyproject.toml`); FLA's Triton kernels run unchanged on CUDA
+- Triton causal convolution enabled on all backends (upstream gated it to HIP);
+  SDPA automatically dispatches to FlashAttention/cuDNN on NVIDIA
+- VRAM allocator cap is configurable: `LINNAEUS_VRAM_FRACTION` (default `0.8`;
+  use `0.95` on headless servers)
+- GPU telemetry auto-detects the DRM device and falls back to NVML
+  (`pdm install -G telemetry`); override with `LINNAEUS_GPU_DEVICE` /
+  `LINNAEUS_GPU_INDEX`
+- Linux + CUDA only; macOS is not a supported runtime
+
+```bash
+pdm use 3.12
+pdm install --check --prod -G train -G telemetry
+LINNAEUS_VRAM_FRACTION=0.95 pdm run python scripts/run_experiment.py
+```
+
+On hosts without direct Hugging Face access: `export HF_ENDPOINT=https://hf-mirror.com`.
+
+---
 
 Dohnuts builds small multimodal models for direct decisions. Give the model a
 message, a document, or an image, and ask it to choose, judge, or score. It returns
