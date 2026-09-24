@@ -26,6 +26,9 @@ dependencies = [
 
 [project.optional-dependencies]
 train = ["pyarrow>=25", "scikit-learn>=1.9", "pandas>=3.0", "datasets>=4"]
+# Optional speed-up, intentionally not a hard dependency: install `hf-transfer`
+# on the training host and run_experiment enables HF_HUB_ENABLE_HF_TRANSFER
+# automatically for the multi-GB dataset/model pulls.
 # NVML board telemetry on NVIDIA hosts; without it Sampler still records RSS.
 telemetry = ["nvidia-ml-py>=12"]
 agent = ["bub @ git+https://github.com/bubbuild/bub.git@9bf70488e22a44eeb875a9d55d9a7d352b82e381"]

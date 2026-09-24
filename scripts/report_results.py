@@ -131,6 +131,8 @@ def main():
     references = {}
     for engine in ["laya", "laya-vision"]:
         directory = args.run / "references" / engine
+        if not (directory / "predictions.jsonl").exists():
+            continue
         ids = {row["id"] for row in read_rows(directory / "predictions.jsonl")}
         if not ids <= own_ids:
             raise ValueError(f"{engine} includes IDs absent from the Dohnuts final predictions")
@@ -144,11 +146,18 @@ def main():
         "checkpoint": metadata,
         "evaluation": evaluation,
         "same_id_references": references,
-        "acceptance": read_json(args.run / "acceptance/report.json"),
-        "quality_audit": read_json(args.run / "quality-audit/report.json"),
         "latency": latency,
-        "jevbench": read_json(args.run / "jevbench/summary.json"),
-        "laya_chart": read_json(args.run / "laya-chart/summary.json"),
+    }
+    # Optional stages may have been skipped via --skip; include what exists.
+    for key, path in {
+        "acceptance": args.run / "acceptance/report.json",
+        "quality_audit": args.run / "quality-audit/report.json",
+        "jevbench": args.run / "jevbench/summary.json",
+        "laya_chart": args.run / "laya-chart/summary.json",
+    }.items():
+        if path.exists():
+            summary[key] = read_json(path)
+    summary |= {
         "scope": [
             "One seed; variation across seeds is unmeasured. Development selects weights; calibration fits temperatures; test never selects either.",
             "Laya references use their own templates, FP32 CPU weights and published temperatures; Dohnuts uses merged BF16 weights.",
@@ -162,18 +171,18 @@ def main():
         prior = read_json(baseline / selected.name / "evaluation.json")
         if prior["source_hashes"] != evaluation["source_hashes"]:
             raise ValueError("Training-budget comparison requires identical dataset partitions")
-        prior_jev = read_json(baseline / "jevbench/summary.json")
-        comparisons.append(
-            {
-                "baseline": str(baseline),
-                "before_step": prior["selected_step"],
-                "after_step": evaluation["selected_step"],
-                "before_accuracy": prior["calibrated"]["macro_accuracy"],
-                "after_accuracy": evaluation["calibrated"]["macro_accuracy"],
-                "before_jev_correct": prior_jev["metrics"]["n_correct"],
-                "after_jev_correct": summary["jevbench"]["metrics"]["n_correct"],
-            }
-        )
+        comparison = {
+            "baseline": str(baseline),
+            "before_step": prior["selected_step"],
+            "after_step": evaluation["selected_step"],
+            "before_accuracy": prior["calibrated"]["macro_accuracy"],
+            "after_accuracy": evaluation["calibrated"]["macro_accuracy"],
+        }
+        prior_jev_path = baseline / "jevbench/summary.json"
+        if prior_jev_path.exists() and "jevbench" in summary:
+            comparison["before_jev_correct"] = read_json(prior_jev_path)["metrics"]["n_correct"]
+            comparison["after_jev_correct"] = summary["jevbench"]["metrics"]["n_correct"]
+        comparisons.append(comparison)
         for name, value in evaluation["calibrated"].items():
             if not isinstance(value, dict):
                 continue
@@ -195,7 +204,7 @@ def main():
         f"# {metadata['model_id']}",
         "",
         (
-            "Built on Qwen3.5-0.8B, this checkpoint returns decision distributions from text "
+            f"Built on {metadata['base_model']}, this checkpoint returns decision distributions from text "
             "and images. It supports candidate selection (`choice`), truth estimates (`noul`), "
             "and ordered scores (`score`) without generating reasoning or free-form responses."
         ),
@@ -258,13 +267,14 @@ def main():
                 f"{raw['nll']:.4f} / {value['nll']:.4f} | "
                 f"{raw['ece_15']:.4f} / {value['ece_15']:.4f} |"
             )
-    lines += [
-        "",
-        "### Reference comparisons",
-        "",
-        "| Same-ID reference | Dohnuts macro accuracy | Reference macro accuracy |",
-        "| --- | ---: | ---: |",
-    ]
+    if references:
+        lines += [
+            "",
+            "### Reference comparisons",
+            "",
+            "| Same-ID reference | Dohnuts macro accuracy | Reference macro accuracy |",
+            "| --- | ---: | ---: |",
+        ]
     for name, value in references.items():
         lines.append(
             f"| {display_names.get(name, name)} | {value['dohnuts_on_same_ids']['macro_accuracy']:.2%} | "
@@ -286,20 +296,20 @@ def main():
             f"| {display_names.get(row['engine'], row['engine'])} | {row['case']} | {timing['p50_ms']:.2f} | "
             f"{timing['p95_ms']:.2f} | {timing['decisions_per_second']:.1f} |"
         )
-    jev = summary["jevbench"]
-    laya = summary["laya_chart"]
-    lines += [
-        "",
-        "### Benchmark coverage",
-        "",
-        (
+    lines += ["", "### Benchmark coverage", ""]
+    if "jevbench" in summary:
+        jev = summary["jevbench"]
+        lines.append(
             f"JevBench: {jev['metrics']['n_correct']}/{jev['coverage']['available']} public tasks correct; "
             f"{jev['coverage']['unavailable']} official tasks unavailable. No official leaderboard rank."
-        ),
-        (
+        )
+    if "laya_chart" in summary:
+        laya = summary["laya_chart"]
+        lines.append(
             f"Laya chart protocol: {len(laya['metrics'])} suites, including 51 MASSIVE languages; "
             f"MASSIVE macro accuracy {laya['massive51']['macro_accuracy']:.2%}."
-        ),
+        )
+    lines += [
         "",
         "## Use",
         "",

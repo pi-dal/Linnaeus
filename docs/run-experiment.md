@@ -44,8 +44,19 @@ additional product versions.
 
 The RLCD controls are `--sigma` and `--ce-weight`, defaulting to 0.3 and
 1.0; `--steps` sets the total update budget. `--data`, `--model`, and `--output` identify local assets and output locations.
-They do not select architectures or change the fixed method. Different backbone
-support uses the [adapter interface](design.md).
+
+Linnaeus adds backbone and execution controls:
+
+| Flag | Default | Effect |
+| --- | --- | --- |
+| `--base-repo` / `--base-revision` | `Qwen/Qwen3.5-0.8B` + pinned commit | Backbone downloaded when `--model` lacks `revision.txt`; recorded as `base_model_id` |
+| `--lora-rank` | 8 | LoRA rank (alpha = 2×rank); changes trainable shapes — use a fresh `--output` |
+| `--workers` | 2 | DataLoader workers for train and evaluation collation |
+| `--eval-batch-size` | 16 | Questions per evaluation forward; larger is faster on idle VRAM |
+| `--cpu-threads` | 8 | Torch CPU threads |
+| `--skip` | — | Comma-separated stage groups: `acceptance`, `audit`, `references`, `benchmarks`, `jevbench`, `laya-chart`, `report`. Skipping upstream references saves hours on iteration runs; `report` tolerates missing sections |
+
+Different backbone support uses the [adapter interface](design.md).
 
 Base initialization and checkpoint initialization use the same 26-group mixture
 and training workflow. To initialize from an exported checkpoint:

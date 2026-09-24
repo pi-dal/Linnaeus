@@ -68,13 +68,13 @@ def load_checkpoint(model, path, optimizer=None):
 
 
 @torch.inference_mode()
-def evaluate(model, groups, collator, output, batch_size=16):
+def evaluate(model, groups, collator, output, batch_size=16, workers=2):
     model.eval()
     records = []
     loader = torch.utils.data.DataLoader(
         EvaluationBatches(groups, collator, batch_size),
         batch_size=None,
-        num_workers=2,
+        num_workers=workers,
         prefetch_factor=2,
         pin_memory=True,
     )
@@ -134,6 +134,8 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
         metadata = model.load_adapter(initialize_from)
         parent = {"checkpoint": str(initialize_from), "weights_sha256": metadata["weights_sha256"]}
     parameters = [p for p in model.parameters() if p.requires_grad]
+    # LoRA+head is a small parameter set: the step is kernel-launch bound, so
+    # fused AdamW is a measurable win on CUDA. Falls back gracefully elsewhere.
     optimizer = torch.optim.AdamW(
         [
             {
@@ -152,6 +154,7 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
             },
         ],
         weight_decay=0.01,
+        fused=torch.cuda.is_available(),
     )
     data = Path(config["data"])
     groups = load_records(data / "train.jsonl", config["train_cap"])
@@ -234,7 +237,12 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
             )
         )
         baseline = evaluate(
-            model, dev, collator, run / "dev-step-000000.jsonl", config["eval_batch_size"]
+            model,
+            dev,
+            collator,
+            run / "dev-step-000000.jsonl",
+            config["eval_batch_size"],
+            workers=config["workers"],
         )
         baseline_metrics = by_dataset(baseline)
         emit(run / "metrics.jsonl", {"kind": "dev", "step": 0, "metrics": baseline_metrics})
@@ -255,7 +263,7 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
         dataset,
         batch_size=None,
         num_workers=config["workers"],
-        prefetch_factor=2 if config["workers"] else None,
+        prefetch_factor=4 if config["workers"] else None,
         pin_memory=True,
     )
     iterator = prefetch_batches(loader)
@@ -330,6 +338,7 @@ def train(config, run, *, resume=False, adapter=None, initialize_from=None):
                     collator,
                     run / f"dev-step-{step:06d}.jsonl",
                     config["eval_batch_size"],
+                    workers=config["workers"],
                 )
                 metrics = by_dataset(predictions)
                 score = metrics["macro_accuracy"]
@@ -376,6 +385,7 @@ def final_evaluation(config, run, *, adapter=None):
         collator,
         run / "calibration-predictions.jsonl",
         config["eval_batch_size"],
+        workers=config["workers"],
     )
     temperatures = fit_temperatures(calibration)
     (run / "temperatures.json").write_text(json.dumps(temperatures, indent=2) + "\n")
@@ -385,6 +395,7 @@ def final_evaluation(config, run, *, adapter=None):
         collator,
         run / "test-predictions.jsonl",
         config["eval_batch_size"],
+        workers=config["workers"],
     )
     training_monitor = evaluate(
         model,
@@ -392,6 +403,7 @@ def final_evaluation(config, run, *, adapter=None):
         collator,
         run / "train-monitor-predictions.jsonl",
         config["eval_batch_size"],
+        workers=config["workers"],
     )
     report = {
         "selected_step": state["step"],

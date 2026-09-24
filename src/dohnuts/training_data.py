@@ -4,7 +4,7 @@ import copy
 import hashlib
 import json
 import random
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from pathlib import Path
 
 import torch
@@ -40,12 +40,32 @@ class DecisionCollator:
         self.processor = self.adapter.processor(model_path)
         self.marker_id = self.processor.tokenizer.convert_tokens_to_ids(self.adapter.marker)
         self.max_length = MAX_LENGTH
+        # Sampling with replacement revisits images; decode once per worker.
+        self._image_cache = OrderedDict()
+
+    def load_image(self, path):
+        image = self._image_cache.get(path)
+        if image is None:
+            with Image.open(path) as opened:
+                image = opened.convert("RGB")
+            self._image_cache[path] = image
+            while len(self._image_cache) > 128:
+                self._image_cache.popitem(last=False)
+        else:
+            self._image_cache.move_to_end(path)
+        return image
 
     def __call__(self, records, *, permutation_seed=None):
         texts, images, targets, types = [], [], [], []
         rng = random.Random(permutation_seed)
         for record in records:
-            question = copy.deepcopy(record["question"])
+            # Only candidate permutation mutates the question; evaluation and
+            # non-choice records can share the stored mapping.
+            question = (
+                copy.deepcopy(record["question"])
+                if permutation_seed is not None and record["question"]["type"] == "choice"
+                else record["question"]
+            )
             target = record["target"][:]
             # Ordinal levels and binary semantic order must remain fixed.
             if permutation_seed is not None and question["type"] == "choice":
@@ -63,8 +83,7 @@ class DecisionCollator:
             text, _ = render_question(state, question, has_image=has_image, adapter=self.adapter)
             texts.append(text)
             if has_image:
-                with Image.open(record["image"]) as image:
-                    images.append(image.convert("RGB"))
+                images.append(self.load_image(record["image"]))
             targets.append(target)
             types.append(question["type"])
         inputs = self.adapter.batch_inputs(self.processor, texts, images)

@@ -61,7 +61,25 @@ def main():
     parser.add_argument(
         "--cpu-threads", type=int, default=8, help="Torch CPU threads for collation"
     )
+    parser.add_argument(
+        "--skip",
+        default="",
+        help="Comma-separated stage groups to skip: "
+        "acceptance,audit,references,benchmarks,jevbench,laya-chart,report",
+    )
     args = parser.parse_args()
+    skip = {token.strip() for token in args.skip.split(",") if token.strip()}
+    unknown = skip - {
+        "acceptance",
+        "audit",
+        "references",
+        "benchmarks",
+        "jevbench",
+        "laya-chart",
+        "report",
+    }
+    if unknown:
+        raise ValueError(f"Unknown --skip groups: {sorted(unknown)}")
     policy = RLCDConfig(sigma=args.sigma, ce_weight=args.ce_weight)
     recipe_path = args.output / "recipe.json"
     previous = json.loads(recipe_path.read_text()) if recipe_path.exists() else None
@@ -92,6 +110,10 @@ def main():
     # The ROCm-only AOTriton flag is set inside Qwen35Adapter when HIP is present.
     env.setdefault("CUDA_VISIBLE_DEVICES", "0")
     env.setdefault("ROCR_VISIBLE_DEVICES", "0")
+    import importlib.util
+
+    if importlib.util.find_spec("hf_transfer"):
+        env.setdefault("HF_HUB_ENABLE_HF_TRANSFER", "1")
     completed = args.output / "completed.json"
     done = json.loads(completed.read_text()) if completed.exists() else {}
 
@@ -205,24 +227,26 @@ def main():
         directory,
     )
     checkpoint = args.output / "checkpoint"
-    python(
-        "accept-checkpoint",
-        "tests/acceptance.py",
-        "--checkpoint",
-        checkpoint,
-        "--output",
-        args.output / "acceptance",
-    )
-    python(
-        "audit-quality",
-        "scripts/audit_checkpoint.py",
-        "--checkpoint",
-        checkpoint,
-        "--data",
-        args.data,
-        "--output",
-        args.output / "quality-audit",
-    )
+    if "acceptance" not in skip:
+        python(
+            "accept-checkpoint",
+            "tests/acceptance.py",
+            "--checkpoint",
+            checkpoint,
+            "--output",
+            args.output / "acceptance",
+        )
+    if "audit" not in skip:
+        python(
+            "audit-quality",
+            "scripts/audit_checkpoint.py",
+            "--checkpoint",
+            checkpoint,
+            "--data",
+            args.data,
+            "--output",
+            args.output / "quality-audit",
+        )
     from huggingface_hub import snapshot_download
 
     references = [
@@ -243,26 +267,32 @@ def main():
             ".cache/models/laya-vision-trained",
         ),
     ]
-    for name, url, revision, model_id, model_revision, model_path in references:
-        upstream = Path(".cache/upstream") / name
-        if not upstream.exists():
-            run("clone-" + name, "git", "clone", url, upstream)
-        run("pin-" + name, "git", "-C", upstream, "checkout", "--detach", revision)
-        if not (Path(model_path) / "revision.txt").exists():
-            snapshot_download(model_id, revision=model_revision, local_dir=model_path)
-            (Path(model_path) / "revision.txt").write_text(model_revision + "\n")
-        python(
-            "quality-" + name,
-            "scripts/evaluate_upstream.py",
-            name,
-            "--data",
-            args.data,
-            "--output",
-            args.output / "references" / name,
-        )
+    if "references" not in skip:
+        for name, url, revision, model_id, model_revision, model_path in references:
+            upstream = Path(".cache/upstream") / name
+            if not upstream.exists():
+                run("clone-" + name, "git", "clone", url, upstream)
+            run("pin-" + name, "git", "-C", upstream, "checkout", "--detach", revision)
+            if not (Path(model_path) / "revision.txt").exists():
+                snapshot_download(model_id, revision=model_revision, local_dir=model_path)
+                (Path(model_path) / "revision.txt").write_text(model_revision + "\n")
+            python(
+                "quality-" + name,
+                "scripts/evaluate_upstream.py",
+                name,
+                "--data",
+                args.data,
+                "--output",
+                args.output / "references" / name,
+            )
     benchmarks = args.output / "benchmarks"
     benchmarks.mkdir(exist_ok=True)
     for engine in ["dohnuts", "laya", "laya-vision"]:
+        if engine == "dohnuts":
+            if "benchmarks" in skip:
+                continue
+        elif "references" in skip:
+            continue
         extra = ["--checkpoint", checkpoint] if engine == "dohnuts" else []
         python(
             f"bench-{engine}",
@@ -272,61 +302,64 @@ def main():
             benchmarks / f"{engine}.jsonl",
             *extra,
         )
-    jevbench = Path(".cache/upstream/jevbench")
-    if not jevbench.exists():
-        run(
-            "clone-jevbench",
-            "git",
-            "clone",
-            "--branch",
-            "v1.2.2",
-            "--depth",
-            "1",
-            "https://github.com/fstandhartinger/jevbench.git",
+    if "jevbench" not in skip:
+        jevbench = Path(".cache/upstream/jevbench")
+        if not jevbench.exists():
+            run(
+                "clone-jevbench",
+                "git",
+                "clone",
+                "--branch",
+                "v1.2.2",
+                "--depth",
+                "1",
+                "https://github.com/fstandhartinger/jevbench.git",
+                jevbench,
+            )
+        python(
+            "jevbench",
+            "scripts/run_jevbench.py",
+            "--checkpoint",
+            checkpoint,
+            "--output",
+            args.output / "jevbench",
+            "--upstream",
             jevbench,
         )
-    python(
-        "jevbench",
-        "scripts/run_jevbench.py",
-        "--checkpoint",
-        checkpoint,
-        "--output",
-        args.output / "jevbench",
-        "--upstream",
-        jevbench,
-    )
-    research = Path(".cache/upstream/laya-research")
-    if not research.exists():
+    if "laya-chart" not in skip:
+        research = Path(".cache/upstream/laya-research")
+        if not research.exists():
+            run(
+                "clone-laya-research",
+                "git",
+                "clone",
+                "https://github.com/NandhaKishorM/laya.git",
+                research,
+            )
         run(
-            "clone-laya-research",
+            "pin-laya-research",
             "git",
-            "clone",
-            "https://github.com/NandhaKishorM/laya.git",
+            "-C",
             research,
+            "checkout",
+            "--detach",
+            "28d43add7e47ce502489c9433310d55276c64e0f",
         )
-    run(
-        "pin-laya-research",
-        "git",
-        "-C",
-        research,
-        "checkout",
-        "--detach",
-        "28d43add7e47ce502489c9433310d55276c64e0f",
-    )
-    suites = Path("data/benchmarks/laya")
-    if not (suites / "suites.json").exists():
-        python("prepare-laya-chart", "scripts/prepare_laya_benchmark.py", "--output", suites)
-    python(
-        "laya-chart",
-        "scripts/run_laya_benchmark.py",
-        "--checkpoint",
-        checkpoint,
-        "--data",
-        suites,
-        "--output",
-        args.output / "laya-chart",
-    )
-    python("report", "scripts/report_results.py", "--run", args.output)
+        suites = Path("data/benchmarks/laya")
+        if not (suites / "suites.json").exists():
+            python("prepare-laya-chart", "scripts/prepare_laya_benchmark.py", "--output", suites)
+        python(
+            "laya-chart",
+            "scripts/run_laya_benchmark.py",
+            "--checkpoint",
+            checkpoint,
+            "--data",
+            suites,
+            "--output",
+            args.output / "laya-chart",
+        )
+    if "report" not in skip:
+        python("report", "scripts/report_results.py", "--run", args.output)
     print(
         json.dumps({"checkpoint": str(checkpoint), "metrics": str(args.output / "metrics")}),
         flush=True,
