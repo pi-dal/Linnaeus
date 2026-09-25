@@ -211,6 +211,28 @@ Reference points above us: SemIf (Qwen3.5-4B) 80.95%, Jev 1.13.0 86.58%,
 GPT-5.6 Luna 97.40%. Among small local models we are at the top of the ~2B
 class and ahead of every sub-1B classifier.
 
+**Head-to-head on identical tasks** (per-task outcomes, our 231 vs each
+system's published outcomes — wins/losses where models disagree):
+
+| Opponent | We win | They win | Net |
+| --- | ---: | ---: | ---: |
+| SemIf (Qwen3.5-4B) | 12 | 30 | −18 |
+| open-alternative-jev (Qwen3.5-4B) | 21 | 23 | −2 |
+| system-one-open (Gemma 4 E2B) | 20 | 20 | ±0 |
+| system-one (Qwen3-8B) | 22 | 19 | +3 |
+| Nimble 9B | 26 | 13 | +13 |
+| jeff (GLiFormer 400M) | 42 | 18 | +24 |
+| Laya (ModernBERT 421M) | 55 | 21 | +34 |
+| openJev Verdict (ModernBERT 151M) | 64 | 23 | +41 |
+| open-jev (DeBERTa-v3-large) | 65 | 17 | +48 |
+
+Per-topic deltas expose one systematic weakness: `hard/temporal_numeric`
+(arithmetic on amounts, dates, quotas — 15 tasks) is our worst cell at
+**2/15 correct** while most systems answer 5–12 of them. The model is
+uncertain rather than confidently wrong there (scattered probabilities);
+the training mixture is thin on multi-step numeric decisions. Everything
+else — intent, routing, policy, adversarial — is at or above the 4B tier.
+
 **Same backbone (Qwen3.5-2B + rank-8 LoRA + decision head), JevBench v1.4.2
 official** — note v1.4.2 uses expanded tier sizes (standard 96 / hard 220),
 so tier numbers are not on the same task set as our v1.2.2 run:
