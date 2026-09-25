@@ -16,10 +16,10 @@ import torch
 from PIL import Image
 from transformers.models.qwen2_vl.image_processing_qwen2_vl import smart_resize
 
-from dohnuts.metrics import by_dataset
-from dohnuts.predictor import Predictor
-from dohnuts.train import evaluate
-from dohnuts.training_data import DecisionCollator, load_records
+from linnaeus.metrics import by_dataset
+from linnaeus.predictor import Predictor
+from linnaeus.train import evaluate
+from linnaeus.training_data import DecisionCollator, load_records
 
 
 def paired(reference, actual):

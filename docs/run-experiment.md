@@ -1,4 +1,4 @@
-# Train and evaluate Dohnuts
+# Train and evaluate Linnaeus
 
 Use Python 3.12 and a working PyTorch installation on a CUDA GPU
 (Linnaeus targets NVIDIA; upstream recorded ROCm on an RX 7900 XTX).
@@ -34,7 +34,7 @@ Completed stages are recorded; rerunning the command resumes the same recipe.
 A different recipe or dataset requires a separate experiment directory. The
 current method warms up for 72 updates, follows cosine decay through update
 2,400, and uses the 10% learning-rate floor through update 3,600. This is the
-schedule used by the selected Dohnuts 0.1.0 export.
+schedule used by the selected Linnaeus 0.1.0 export.
 
 `--steps` changes an experiment's total budget. Extending a completed run retains
 optimizer and random state, sampling position, and the decay horizon. Development
@@ -92,7 +92,7 @@ The default data directory is `data/processed/v1`; outputs go to `runs/v1`:
 | `recipe.json` | Fixed settings, exposed RLCD values, and source hashes |
 
 ```python
-from dohnuts.predictor import Predictor
+from linnaeus.predictor import Predictor
 
 model = Predictor.from_checkpoint("runs/v1/checkpoint")
 ```

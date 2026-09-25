@@ -177,7 +177,7 @@ def main():
     manifest["scope"] = [
         "Original upstream question builders, seed 13, case order, candidate order and state shortening.",
         "Dataset snapshots are pinned here. Upstream results lack dataset revisions and per-example hashes, so historical byte identity cannot be independently established.",
-        "Upstream in_training/held_out metadata describes Laya, not Dohnuts; this is additional evaluation, with no checkpoint or temperature selection.",
+        "Upstream in_training/held_out metadata describes Laya, not Linnaeus; this is additional evaluation, with no checkpoint or temperature selection.",
     ]
     save_manifest()
     print(

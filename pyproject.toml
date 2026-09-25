@@ -53,7 +53,7 @@ required-environments = [
 ]
 
 [tool.uv.build-backend]
-module-name = "dohnuts"
+module-name = "linnaeus"
 module-root = "src"
 
 [tool.uv.sources]

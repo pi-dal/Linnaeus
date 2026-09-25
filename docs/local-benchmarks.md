@@ -56,7 +56,7 @@ tariff, so cost and the four-axis composite remain unmeasured.
 
 The official Laya research branch at `28d43add7e47ce502489c9433310d55276c64e0f`
 contains the builders for the application, multilingual, calibration, and latency
-measurements in its comparison chart. Run them on the exported Dohnuts checkpoint:
+measurements in its comparison chart. Run them on the exported Linnaeus checkpoint:
 
 ```bash
 git clone --branch research https://github.com/NandhaKishorM/laya.git .cache/upstream/laya-research
@@ -87,7 +87,7 @@ result omits BANKING77. Typed-decisions soft accuracy is the inner product of
 predicted and teacher distributions, following this benchmark's definition.
 
 Local latency uses the RX 7900 XTX, not the chart's T4. Mixed-language measurements
-use the upstream English/Hindi request stream and one resident Dohnuts model; no
+use the upstream English/Hindi request stream and one resident Linnaeus model; no
 checkpoint routing or swapping is added. Local inference has a compute cost even
 when no API fee is paid.
 

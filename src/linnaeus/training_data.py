@@ -10,11 +10,11 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from dohnuts.adapters import Qwen35Adapter
-from dohnuts.execution import plan_prefix
-from dohnuts.model import marker_positions
-from dohnuts.predictor import render, render_question
-from dohnuts.recipe import MAX_LENGTH
+from linnaeus.adapters import Qwen35Adapter
+from linnaeus.execution import plan_prefix
+from linnaeus.model import marker_positions
+from linnaeus.predictor import render, render_question
+from linnaeus.recipe import MAX_LENGTH
 
 
 def stable_key(value):

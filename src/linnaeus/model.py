@@ -7,8 +7,8 @@ from pathlib import Path
 import torch
 from torch import Tensor, nn
 
-from dohnuts.adapters import Qwen35Adapter
-from dohnuts.recipe import IMAGE_PIXELS, MAX_LENGTH
+from linnaeus.adapters import Qwen35Adapter
+from linnaeus.recipe import IMAGE_PIXELS, MAX_LENGTH
 
 
 def model_revision(directory):
@@ -61,7 +61,7 @@ class DecisionModel(nn.Module):
         from safetensors.torch import load_file
 
         directory = Path(directory)
-        metadata = json.loads((directory / "dohnuts.json").read_text())
+        metadata = json.loads((directory / "linnaeus.json").read_text())
         weights = directory / "adapter.safetensors"
         if (
             metadata.get("format_version") != 1

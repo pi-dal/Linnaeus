@@ -4,7 +4,7 @@ import pytest
 import torch
 from transformers.models.qwen3_5.configuration_qwen3_5 import Qwen3_5TextConfig
 
-from dohnuts.execution import PrefixCache
+from linnaeus.execution import PrefixCache
 
 
 @pytest.fixture

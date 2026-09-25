@@ -28,7 +28,7 @@ false/true order and ordinal level order stay fixed. Soft labels are normalized
 within tolerance; VQAv2 yes/no votes and typed-decisions distributions retain
 uncertainty rather than being converted to hard labels.
 
-The training recipe is defined in `src/dohnuts/recipe.py`: equal probability per
+The training recipe is defined in `src/linnaeus/recipe.py`: equal probability per
 source/language/task group, deterministic sampling with replacement, at most
 6,000 eligible source rows in each group's training pool, batch 8 with four
 accumulation steps, a default budget of 3,600 updates, LoRA LR 1e−4 and head LR 5e−4,

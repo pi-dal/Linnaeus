@@ -10,10 +10,10 @@ import torch
 from huggingface_hub import snapshot_download
 from PIL import Image
 
-from dohnuts.adapters import Qwen35Adapter
-from dohnuts.execution import plan_prefix
-from dohnuts.model import DecisionModel, marker_positions
-from dohnuts.recipe import BASE_MODEL, IMAGE_PIXELS
+from linnaeus.adapters import Qwen35Adapter
+from linnaeus.execution import plan_prefix
+from linnaeus.model import DecisionModel, marker_positions
+from linnaeus.recipe import BASE_MODEL, IMAGE_PIXELS
 
 QTYPES = {"choice": 0, "score": 1, "noul": 2}
 
@@ -98,10 +98,10 @@ class Predictor:
                 snapshot_download(
                     str(source),
                     revision=revision,
-                    allow_patterns=["dohnuts.json", "adapter.safetensors", "LICENSE"],
+                    allow_patterns=["linnaeus.json", "adapter.safetensors", "LICENSE"],
                 )
             )
-        config = json.loads((directory / "dohnuts.json").read_text())
+        config = json.loads((directory / "linnaeus.json").read_text())
         if base_model is None:
             base_model = Path(config.get("base_path", BASE_MODEL)).expanduser()
             if not base_model.is_dir():
@@ -196,7 +196,7 @@ class Predictor:
                     answer["score"] = sum(i * p for i, p in enumerate(values))
             answers[qid] = answer
         return {
-            "model": "dohnuts",
+            "model": "linnaeus",
             "answers": answers,
             "usage": {"input_tokens": token_count, "images": int(has_image)},
         }

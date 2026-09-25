@@ -28,14 +28,14 @@ repositories are public; downloading them does not require a Hugging Face login.
 Run Python examples with `uv run python` from the repository root:
 
 ```python
-from dohnuts.predictor import Predictor
+from linnaeus.predictor import Predictor
 
 model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
 ```
 
 The loader verifies the checkpoint's weight checksum and base revision, merges
 LoRA, and applies its saved calibration temperatures. The checkpoint contains
-the decision head as well as LoRA; load it through Dohnuts. It is not a standalone
+the decision head as well as LoRA; load it through Linnaeus. It is not a standalone
 Transformers language model or a standard PEFT adapter export.
 
 The same method accepts a local checkpoint directory. An optional `revision`

@@ -29,7 +29,7 @@ to act on the returned probabilities.
 After [setting up the runtime](docs/inference.md), load the model from Hugging Face:
 
 ```python
-from dohnuts.predictor import Predictor
+from linnaeus.predictor import Predictor
 
 model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
 ```
@@ -163,7 +163,7 @@ Selected weight SHA-256:
 `196be33a0282537bcd821e2115643b352d0ad2a0bbaf7b242a1b7fe5bd96cfdf`.
 
 The exported checkpoint records calibration, selection, and partition hashes in
-`dohnuts.json`. The [results](results/README.md) include loss, development accuracy,
+`linnaeus.json`. The [results](results/README.md) include loss, development accuracy,
 held-out quality, calibration bins, latency samples, and resource measurements.
 Their manifest identifies the selected weights and checksums each published table.
 No training Git revision was recorded. [Chart values](docs/figures/chart-data.csv)

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from dohnuts.rlcd import RLCDConfig, distribution_rewards, rlcd_loss
+from linnaeus.rlcd import RLCDConfig, distribution_rewards, rlcd_loss
 
 CASES = json.loads((Path(__file__).parent / "fixtures/laya-rlcd.json").read_text())["cases"]
 

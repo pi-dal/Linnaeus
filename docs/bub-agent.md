@@ -1,6 +1,6 @@
 # Agent integration with Bub main
 
-Dohnuts provides one decision tool through Bub. The `agent` extra pins Bub main at
+Linnaeus provides one decision tool through Bub. The `agent` extra pins Bub main at
 `9bf70488e22a44eeb875a9d55d9a7d352b82e381`. Integration uses its
 [Python SDK](https://github.com/bubbuild/bub/blob/9bf70488e22a44eeb875a9d55d9a7d352b82e381/website/src/content/docs/docs/build/sdk.md)
 to provide one batch decision tool and persistent session tapes.
@@ -14,8 +14,8 @@ uv sync --extra agent
 ```python
 from pathlib import Path
 
-from dohnuts.bub_agent import create_agent
-from dohnuts.predictor import Predictor
+from linnaeus.bub_agent import create_agent
+from linnaeus.predictor import Predictor
 
 predictor = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
 framework, agent = create_agent(
@@ -24,14 +24,14 @@ framework, agent = create_agent(
 
 
 async def decide():
-    command = ',dohnuts.decide state=\'{"message":"Please refund this invoice."}\' '
+    command = ',linnaeus.decide state=\'{"message":"Please refund this invoice."}\' '
     command += 'questions=\'{"refund":{"type":"noul","instructions":"Is a refund requested?"}}\''
     async with framework.running():
         stream = await agent.run_stream(session_id="billing", prompt=command)
         return [event async for event in stream]
 ```
 
-The tool is named `dohnuts.decide`; its model-facing alias is `dohnuts_decide`. Supply
+The tool is named `linnaeus.decide`; its model-facing alias is `linnaeus_decide`. Supply
 independent questions together against one state. Its optional `image_path`
 argument names an image within the application's workspace. The returned
 probabilities retain the predictor's meanings. Calls are serialized per predictor

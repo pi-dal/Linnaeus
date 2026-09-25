@@ -12,12 +12,12 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from dohnuts.bub_agent import BUB_REVISION, create_agent
-from dohnuts.predictor import Predictor
+from linnaeus.bub_agent import BUB_REVISION, create_agent
+from linnaeus.predictor import Predictor
 
 
 def check_response(response, questions):
-    assert response["model"] == "dohnuts", "Responses must identify the model family"
+    assert response["model"] == "linnaeus", "Responses must identify the model family"
     answers = response["answers"]
     assert set(answers) == set(questions), "Every submitted question must have an answer"
     for key, question in questions.items():
@@ -112,7 +112,7 @@ async def verify(args):
             ("text", state, questions, expected),
             ("image", {}, image_questions, image_response),
         ]:
-            command = ",dohnuts.decide state=" + shlex.quote(json.dumps(request_state))
+            command = ",linnaeus.decide state=" + shlex.quote(json.dumps(request_state))
             command += " questions=" + shlex.quote(json.dumps(request_questions))
             if label == "image":
                 command += " image_path=" + shlex.quote(str(image_path.resolve()))

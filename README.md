@@ -1,4 +1,4 @@
-<img src="assets/dohnuts-logo.png" width="160" align="right" alt="A pink-frosted doughnut doing a facepalm">
+<img src="assets/linnaeus-logo.png" width="160" align="right" alt="A pink-frosted doughnut doing a facepalm">
 
 # Linnaeus
 
@@ -31,7 +31,7 @@ On hosts without direct Hugging Face access: `export HF_ENDPOINT=https://hf-mirr
 
 ---
 
-Dohnuts builds small multimodal models for direct decisions. Give the model a
+Linnaeus builds small multimodal models for direct decisions. Give the model a
 message, a document, or an image, and ask it to choose, judge, or score. It returns
 probabilities in a single forward pass, with multiple questions sharing the same
 input. That is our take on System 1.
@@ -46,7 +46,7 @@ The 0.8B model runs locally on a consumer GPU.
 Route a support request and check whether it asks for a refund in the same call:
 
 ```python
-from dohnuts.predictor import Predictor
+from linnaeus.predictor import Predictor
 
 model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
 result = model.predict(

@@ -11,20 +11,20 @@ from pathlib import Path
 
 import torch
 
-from dohnuts import __version__
-from dohnuts.adapters import Qwen35Adapter
-from dohnuts.experiment import Sampler, detect_gpu_device, environment, memory
-from dohnuts.predictor import Predictor
-from dohnuts.train import file_hash
+from linnaeus import __version__
+from linnaeus.adapters import Qwen35Adapter
+from linnaeus.experiment import Sampler, detect_gpu_device, environment, memory
+from linnaeus.predictor import Predictor
+from linnaeus.train import file_hash
 
 REVISION = "e105a48f8cdb7f3babb3594424f73e5d7bdc97b9"
 UPSTREAM = Path(".cache/upstream/jevbench")
 COHORTS = {"standard": "original", "easy": "easy", "hard": "hard"}
 
 
-class DohnutsAdapter:
-    name = "dohnuts_local"
-    model = f"Dohnuts-{__version__}-0.8B"
+class LinnaeusAdapter:
+    name = "linnaeus_local"
+    model = f"Linnaeus-{__version__}-0.8B"
     cost_basis = "local_gpu_no_provider_tariff"
     price_input_per_m = None
     price_output_per_m = None
@@ -116,7 +116,7 @@ def summarize_run(output, cohorts, records, metadata, runtime, telemetry, upstre
         comparisons.append(result)
     comparisons.append(
         {
-            "model": "dohnuts",
+            "model": "linnaeus",
             "display": f"{metadata['model_id']} (seed {seed})",
             **{tier + "_accuracy": result["accuracy"] for tier, result in tiers.items()},
             "planned": len(tasks),
@@ -287,7 +287,7 @@ def main():
     tasks = [task for group in cohorts.values() for task in group]
     if len(tasks) != 231 or len({task.id for task in tasks}) != len(tasks):
         raise ValueError("Expected 231 unique public JevBench tasks")
-    metadata = json.loads((args.checkpoint / "dohnuts.json").read_text())
+    metadata = json.loads((args.checkpoint / "linnaeus.json").read_text())
     args.output.mkdir(parents=True, exist_ok=False)
     write_json(
         args.output / "manifest.json",
@@ -299,7 +299,7 @@ def main():
             "mapping": "Unchanged state and build_question(task); noul P(true) maps to yes.",
             "protocol": "Serial, no retries, one native distribution per decision; official Runner.",
             "input_limit": Qwen35Adapter.max_input_tokens,
-            "cost_basis": DohnutsAdapter.cost_basis,
+            "cost_basis": LinnaeusAdapter.cost_basis,
         },
     )
     torch.set_num_threads(8)
@@ -310,7 +310,7 @@ def main():
     runtime["checkpoint"] = str(args.checkpoint)
     runtime["input_limit"] = predictor.max_length
     runner = Runner(
-        DohnutsAdapter(predictor),
+        LinnaeusAdapter(predictor),
         Ledger(args.output / "ledger.jsonl", cap_usd=0),
         args.output / "raw",
         default_reserve_usd=0,

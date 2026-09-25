@@ -1,6 +1,6 @@
 # Shared training and inference execution
 
-Dohnuts has one execution policy: differentiable FLA fusion, shared causal prefixes,
+Linnaeus has one execution policy: differentiable FLA fusion, shared causal prefixes,
 a bounded frozen-image cache, and asynchronous input/output transfer. These are
 the implemented defaults, with no public backend, stream-count, or cache switches.
 
@@ -89,7 +89,7 @@ assumes no overlap; taking just one global maximum assumes ideal overlap. A
 critical-path model sits between these extremes. CPU preparation, queueing,
 serialization and cold compilation also belong in end-to-end measurements.
 
-The arithmetic count must exclude unused vocabulary projections: Dohnuts gathers
+The arithmetic count must exclude unused vocabulary projections: Linnaeus gathers
 candidate hidden states into a scalar head and never computes token-generation
 logits. Embedding storage is not a dense matrix multiplication per token. Image
 encoding is counted only when an image is present. Reused prefixes or frozen
@@ -104,7 +104,7 @@ exact training ETA. Hardware microbenchmark throughput is not API throughput.
 ## Measurement
 
 ```bash
-uv run python scripts/benchmark.py dohnuts --checkpoint runs/v1/checkpoint --output runs/v1/benchmarks/dohnuts.jsonl
+uv run python scripts/benchmark.py linnaeus --checkpoint runs/v1/checkpoint --output runs/v1/benchmarks/linnaeus.jsonl
 ```
 
 The benchmark measures complete prediction calls over text and image workloads,

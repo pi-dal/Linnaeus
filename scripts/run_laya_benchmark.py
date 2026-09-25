@@ -1,4 +1,4 @@
-"""Evaluate the frozen Dohnuts checkpoint on the original Laya chart protocols."""
+"""Evaluate the frozen Linnaeus checkpoint on the original Laya chart protocols."""
 
 import argparse
 import csv
@@ -17,7 +17,7 @@ import numpy as np
 import torch
 from prepare_laya_benchmark import REVISION, SOURCE, UPSTREAM, digest
 
-from dohnuts.experiment import (
+from linnaeus.experiment import (
     Sampler,
     detect_gpu_device,
     environment,
@@ -25,7 +25,7 @@ from dohnuts.experiment import (
     memory,
     timed,
 )
-from dohnuts.predictor import QTYPES, Predictor
+from linnaeus.predictor import QTYPES, Predictor
 
 CHECKPOINT = Path("runs/v1/checkpoint")
 OUTPUT = Path("runs/v1/laya-chart")
@@ -177,7 +177,7 @@ def performance(predictor):
         "mixed_language": mixtures,
         "memory": memory(),
         "telemetry": sampler.summary(),
-        "scope": "RX 7900 XTX; native predict(), BF16, eight CPU threads; same upstream workload; single resident Dohnuts model, no checkpoint swaps",
+        "scope": "RX 7900 XTX; native predict(), BF16, eight CPU threads; same upstream workload; single resident Linnaeus model, no checkpoint swaps",
     }
 
 
@@ -318,10 +318,10 @@ def report(rows, suites, metadata, runtime, timing):
     matched_calibration = {
         model: {
             "n_suites": len(reference["per_suite"]),
-            "dohnuts_ece_shipped": statistics.mean(
+            "linnaeus_ece_shipped": statistics.mean(
                 calibration["colab/" + name]["shipped"]["ece"] for name in reference["per_suite"]
             ),
-            "dohnuts_ece_refit": statistics.mean(
+            "linnaeus_ece_refit": statistics.mean(
                 calibration["colab/" + name]["refit"]["ece"] for name in reference["per_suite"]
             ),
             "published_ece_shipped": reference["mean_ece_shipped"],
@@ -476,7 +476,7 @@ def main():
     manifest = json.loads((OUTPUT / "data-manifest.json").read_text())
     if digest(OUTPUT / "suites.json") != manifest["suite_sha256"]:
         raise ValueError("Evaluation questions differ from the frozen manifest")
-    metadata = json.loads((CHECKPOINT / "dohnuts.json").read_text())
+    metadata = json.loads((CHECKPOINT / "linnaeus.json").read_text())
     config = {
         "checkpoint_sha256": metadata["weights_sha256"],
         "suite_sha256": manifest["suite_sha256"],

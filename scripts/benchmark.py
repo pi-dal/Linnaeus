@@ -10,7 +10,7 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from dohnuts.experiment import (
+from linnaeus.experiment import (
     Sampler,
     detect_gpu_device,
     emit,
@@ -103,7 +103,7 @@ def measure(args, agent, engine_label):
             "memory": memory(),
             "seed": 0,
             "checkpoint": str(args.checkpoint) if args.checkpoint else None,
-            "merged_lora": args.engine == "dohnuts" and args.checkpoint is not None,
+            "merged_lora": args.engine == "linnaeus" and args.checkpoint is not None,
             "trained_vision": args.engine == "laya-vision",
             "torch": torch.__version__,
             "hip": torch.version.hip,
@@ -121,7 +121,7 @@ def measure(args, agent, engine_label):
         with Sampler(detect_gpu_device()) as sampler:
             durations = timed(operation, 20)
         result = operation()
-        if args.engine == "dohnuts":
+        if args.engine == "linnaeus":
             prepared, _, _, _ = agent.prepare(state, questions)
             shape = list(prepared["input_ids"].shape)
             image_grid = prepared.get("image_grid_thw", torch.empty(0)).tolist()
@@ -151,21 +151,21 @@ def measure(args, agent, engine_label):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("engine", choices=["dohnuts", "laya", "laya-vision"])
+    parser.add_argument("engine", choices=["linnaeus", "laya", "laya-vision"])
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path)
     args = parser.parse_args()
-    if args.checkpoint and args.engine != "dohnuts":
-        parser.error("--checkpoint currently selects exported Dohnuts weights")
+    if args.checkpoint and args.engine != "linnaeus":
+        parser.error("--checkpoint currently selects exported Linnaeus weights")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.unlink(missing_ok=True)
     torch.set_num_threads(8)
     torch.manual_seed(0)
-    if args.engine == "dohnuts":
-        from dohnuts.predictor import Predictor
+    if args.engine == "linnaeus":
+        from linnaeus.predictor import Predictor
 
         if args.checkpoint is None:
-            parser.error("Dohnuts benchmarks require --checkpoint pointing to trained weights")
+            parser.error("Linnaeus benchmarks require --checkpoint pointing to trained weights")
         agent = Predictor.from_checkpoint(args.checkpoint)
         model = agent.model
     else:

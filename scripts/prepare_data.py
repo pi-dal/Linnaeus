@@ -30,9 +30,9 @@ from PIL import Image
 from transformers import AutoProcessor, AutoTokenizer
 from transformers.models.qwen2_vl.image_processing_qwen2_vl import smart_resize
 
-from dohnuts.predictor import render, render_question
-from dohnuts.recipe import BASE_MODEL, DATA, IMAGE_PIXELS, MAX_LENGTH
-from dohnuts.training_data import load_records
+from linnaeus.predictor import render, render_question
+from linnaeus.recipe import BASE_MODEL, DATA, IMAGE_PIXELS, MAX_LENGTH
+from linnaeus.training_data import load_records
 
 BUSINESS_RAW = Path("data/raw/enrichment")
 

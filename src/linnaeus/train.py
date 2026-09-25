@@ -14,13 +14,13 @@ from typing import cast
 
 import torch
 
-from dohnuts import __version__
-from dohnuts.experiment import Sampler, detect_gpu_device, emit, environment, memory
-from dohnuts.metrics import by_dataset, by_primitive_and_candidates, fit_temperatures
-from dohnuts.model import DecisionModel
-from dohnuts.recipe import LR_DECAY_STEPS, training_recipe
-from dohnuts.rlcd import RLCDConfig, rlcd_loss
-from dohnuts.training_data import (
+from linnaeus import __version__
+from linnaeus.experiment import Sampler, detect_gpu_device, emit, environment, memory
+from linnaeus.metrics import by_dataset, by_primitive_and_candidates, fit_temperatures
+from linnaeus.model import DecisionModel
+from linnaeus.recipe import LR_DECAY_STEPS, training_recipe
+from linnaeus.rlcd import RLCDConfig, rlcd_loss
+from linnaeus.training_data import (
     DecisionCollator,
     EvaluationBatches,
     TrainingBatches,
@@ -457,8 +457,8 @@ def export_checkpoint(state, run, output):
     temporary.replace(weights)
     metadata = {
         "format_version": 1,
-        "project": "dohnuts",
-        "distribution": "dohnuts",
+        "project": "linnaeus",
+        "distribution": "linnaeus",
         "version": __version__,
         "model_id": model_id(config.get("base_model", "Qwen/Qwen3.5-0.8B")),
         "base_model": config.get("base_model", "Qwen/Qwen3.5-0.8B"),
@@ -481,7 +481,7 @@ def export_checkpoint(state, run, output):
     }
     if "initialized_from" in config:
         metadata["initialized_from"] = config["initialized_from"]
-    (output / "dohnuts.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    (output / "linnaeus.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(json.dumps(metadata), flush=True)
 
 

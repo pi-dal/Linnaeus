@@ -1,4 +1,4 @@
-"""Python tools for training, running, and evaluating Dohnuts models."""
+"""Python tools for training, running, and evaluating Linnaeus models."""
 
 from importlib.metadata import version
 

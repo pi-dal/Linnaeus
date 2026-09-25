@@ -1,6 +1,6 @@
-# Dohnuts documentation
+# Linnaeus documentation
 
-## Use Dohnuts
+## Use Linnaeus
 
 - [Installation and inference](inference.md): load a checkpoint and make text or image decisions.
 - [Agent integration](bub-agent.md): expose decisions through the Bub SDK.

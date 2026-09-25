@@ -1,4 +1,4 @@
-"""Bub main SDK composition for agents that call the Dohnuts batch decision tool."""
+"""Bub main SDK composition for agents that call the Linnaeus batch decision tool."""
 
 import asyncio
 import json
@@ -57,7 +57,7 @@ def create_agent(predictor, workspace: Path, tape_directory: Path):
         @hookimpl
         def system_prompt(self, prompt, state):
             return (
-                "Use dohnuts_decide to evaluate decisions. Batch independent questions over "
+                "Use linnaeus_decide to evaluate decisions. Batch independent questions over "
                 "the same state into one tool call. Preserve returned probabilities and "
                 "candidate meanings in your response. State any uncertainty. "
                 "A decision distribution alone does not authorize external actions."
@@ -65,10 +65,10 @@ def create_agent(predictor, workspace: Path, tape_directory: Path):
 
     framework = BubFramework(config_file=workspace / "bub.yml")
     framework.workspace = workspace
-    framework.plugin_manager.register(DecisionPrompt(framework), name="dohnuts_prompt")
+    framework.plugin_manager.register(DecisionPrompt(framework), name="linnaeus_prompt")
     agent = Agent(
         framework,
-        tools=[Tool.from_callable(decide, name="dohnuts.decide")],
+        tools=[Tool.from_callable(decide, name="linnaeus.decide")],
         skill_dirs=[],
         tape_store=FileTapeStore(tape_directory),
     )

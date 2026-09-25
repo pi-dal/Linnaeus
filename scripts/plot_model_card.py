@@ -23,13 +23,13 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 COLORS = {
-    "dohnuts": "#24677B",
+    "linnaeus": "#24677B",
     "jev": "#515D69",
     "laya-multilingual": "#B7692D",
     "laya-vision": "#805881",
 }
 NAMES = {
-    "dohnuts": "Dohnuts",
+    "linnaeus": "Linnaeus",
     "jev": "Jev 1.13.0",
     "laya-multilingual": "Laya multilingual",
     "laya-vision": "Laya Vision",
@@ -113,19 +113,19 @@ def main():
     output = run / "figures"
     output.mkdir(parents=True, exist_ok=True)
     sources = [
-        run / "checkpoint/dohnuts.json",
+        run / "checkpoint/linnaeus.json",
         run / "jevbench/comparison.json",
         run / "metrics/summary.json",
         run / "laya-chart/summary.json",
     ]
-    sources += [run / f"benchmarks/{s}.jsonl" for s in ["dohnuts", "laya", "laya-vision"]]
+    sources += [run / f"benchmarks/{s}.jsonl" for s in ["linnaeus", "laya", "laya-vision"]]
     checkpoint, jev, summary, chart = map(read_json, sources[:4])
     if jev["checkpoint"]["checkpoint_sha256"] != checkpoint["weights_sha256"]:
         raise ValueError("JevBench results belong to a different checkpoint")
     if summary["checkpoint"]["weights_sha256"] != checkpoint["weights_sha256"]:
         raise ValueError("Quality results belong to a different checkpoint")
     benchmarks = {}
-    for key, source in zip(["dohnuts", "laya-multilingual", "laya-vision"], sources[4:]):
+    for key, source in zip(["linnaeus", "laya-multilingual", "laya-vision"], sources[4:]):
         benchmarks[key] = {
             r["case"]: r
             for r in map(json.loads, source.read_text().splitlines())
@@ -164,7 +164,7 @@ def main():
         "231 identical public task IDs. Labels are percentages; sample counts appear beside each group.",
         8.6,
     )
-    systems = ["dohnuts", "jev", "laya-multilingual", "laya-vision"]
+    systems = ["linnaeus", "jev", "laya-multilingual", "laya-vision"]
     legend(fig, systems)
     for position, dimension, groups, title in [
         (
@@ -205,9 +205,9 @@ def main():
         fig,
         "01_jevbench",
         [
-            "Jev: published per-task outcomes, v1.2.2. Dohnuts and both Laya checkpoints: local measurements. All 231 local outputs are valid.",
-            "Dohnuts context limit: 4,096 tokens. Laya defaults: 1,024 tokens with native truncation. Vision is tested on text here.",
-            "303 official tasks are unavailable, including the judge tier. This is not the 534-task leaderboard score. One Dohnuts seed.",
+            "Jev: published per-task outcomes, v1.2.2. Linnaeus and both Laya checkpoints: local measurements. All 231 local outputs are valid.",
+            "Linnaeus context limit: 4,096 tokens. Laya defaults: 1,024 tokens with native truncation. Vision is tested on text here.",
+            "303 official tasks are unavailable, including the judge tier. This is not the 534-task leaderboard score. One Linnaeus seed.",
         ],
         "JevBench: decision types and difficulty",
     )
@@ -229,15 +229,15 @@ def main():
     ]
     fig = frame(
         "Laya application tasks",
-        "Dohnuts measurements compared with the published Laya multilingual checkpoint; accuracy, higher is better.",
+        "Linnaeus measurements compared with the published Laya multilingual checkpoint; accuracy, higher is better.",
         9.3,
     )
     fig.legend(
         [
             Line2D([], [], color=COLORS[s], marker=m, linestyle="none", markersize=8)
-            for s, m in [("dohnuts", "o"), ("laya-multilingual", "s")]
+            for s, m in [("linnaeus", "o"), ("laya-multilingual", "s")]
         ],
-        ["Dohnuts · measured", "Laya multilingual · published"],
+        ["Linnaeus · measured", "Laya multilingual · published"],
         loc="upper left",
         bbox_to_anchor=(0.04, 0.845),
         ncol=2,
@@ -251,10 +251,10 @@ def main():
         metric = chart["metrics"][task]
         a, b = 100 * metric["accuracy"], 100 * ref["multilingual"]
         ax.plot([a, b], [index, index], color="#BCC5CC", linewidth=2, zorder=1)
-        ax.scatter(a, index, color=COLORS["dohnuts"], s=54, zorder=3)
+        ax.scatter(a, index, color=COLORS["linnaeus"], s=54, zorder=3)
         ax.scatter(b, index, color=COLORS["laya-multilingual"], s=48, marker="s", zorder=2)
         labels.append(f"{title}  ·  {metric['n']:,}")
-        for x, value, system in [(1.10, a, "dohnuts"), (1.40, b, "laya-multilingual")]:
+        for x, value, system in [(1.10, a, "linnaeus"), (1.40, b, "laya-multilingual")]:
             ax.text(
                 x,
                 index,
@@ -275,7 +275,7 @@ def main():
                 "published_application_protocol",
             )
     for x, label, system in [
-        (1.10, "Dohnuts", "dohnuts"),
+        (1.10, "Linnaeus", "linnaeus"),
         (1.40, "Multilingual", "laya-multilingual"),
     ]:
         ax.text(
@@ -309,7 +309,7 @@ def main():
         "Language-macro accuracy on the upstream evaluation protocols; each language has equal weight.",
         7.5,
     )
-    legend(fig, ["dohnuts", "laya-multilingual"])
+    legend(fig, ["linnaeus", "laya-multilingual"])
     names = [
         "MASSIVE intent\n51 languages × 100",
         "MASSIVE intent\n14 languages × 300",
@@ -331,9 +331,9 @@ def main():
             )
         )
     ax = fig.add_axes([0.24, 0.25, 0.69, 0.49])
-    hbars(ax, names, {"dohnuts": np.array(ours) * 100, "laya-multilingual": np.array(refs) * 100})
+    hbars(ax, names, {"linnaeus": np.array(ours) * 100, "laya-multilingual": np.array(refs) * 100})
     for i, name in enumerate(names):
-        for s, values in [("dohnuts", ours), ("laya-multilingual", refs)]:
+        for s, values in [("linnaeus", ours), ("laya-multilingual", refs)]:
             record(
                 "03_multilingual",
                 name.replace("\n", "; "),
@@ -348,8 +348,8 @@ def main():
         "03_multilingual",
         [
             "MASSIVE intent uses 20 candidates; XNLI uses 3. The 51-language and 14-language suites are distinct evaluations.",
-            f"On the 51-language suite, accuracy exceeds 15% (3× random) in {chart['massive51']['languages_above_3x_random']}/51 languages for Dohnuts and {chart['published_references']['massive51']['multilingual']['languages_above_random']}/51 for multilingual.",
-            "Dohnuts: measured. Laya multilingual: published reference. Historical byte identity cannot be independently verified.",
+            f"On the 51-language suite, accuracy exceeds 15% (3× random) in {chart['massive51']['languages_above_3x_random']}/51 languages for Linnaeus and {chart['published_references']['massive51']['multilingual']['languages_above_random']}/51 for multilingual.",
+            "Linnaeus: measured. Laya multilingual: published reference. Historical byte identity cannot be independently verified.",
         ],
         "Laya multilingual: language coverage and accuracy",
     )
@@ -365,7 +365,7 @@ def main():
         "The same example IDs for both models. Confidence quality is shown alongside top-label accuracy.",
         8.4,
     )
-    legend(fig, ["dohnuts", "laya-vision"])
+    legend(fig, ["linnaeus", "laya-vision"])
     for rect, field, title, limit, xlabel, decimals in [
         (
             [0.17, 0.25, 0.32, 0.49],
@@ -379,7 +379,7 @@ def main():
     ]:
         series = {}
         for system, metrics in [
-            ("dohnuts", reference["dohnuts_on_same_ids"]),
+            ("linnaeus", reference["linnaeus_on_same_ids"]),
             ("laya-vision", reference["metrics"]),
         ]:
             series[system] = [
@@ -404,7 +404,7 @@ def main():
         [
             "ScienceQA: official test image subset. VQAv2: independent split of the validation pool. These are not the model-card splits.",
             "Laya Vision has possible VQAv2 training exposure and A-OKVQA checkpoint-selection exposure; this is not a blind comparison.",
-            "Laya: FP32 CPU, 2,048-token total/head budgets. Dohnuts: BF16. ECE: 15 bins, deployed temperatures, no per-task refit.",
+            "Laya: FP32 CPU, 2,048-token total/head budgets. Linnaeus: BF16. ECE: 15 bins, deployed temperatures, no per-task refit.",
         ],
         "Laya Vision: accuracy and calibration",
     )
@@ -414,10 +414,10 @@ def main():
         "Warm end-to-end predict latency · BF16 · lower is better. Each call contains distinct questions.",
         8.2,
     )
-    legend(fig, ["dohnuts", "laya-multilingual", "laya-vision"])
+    legend(fig, ["linnaeus", "laya-multilingual", "laya-vision"])
     ax = fig.add_axes([0.08, 0.25, 0.43, 0.49])
     for system, marker, offsets in [
-        ("dohnuts", "o", (0, -18)),
+        ("linnaeus", "o", (0, -18)),
         ("laya-multilingual", "s", (0, -18)),
         ("laya-vision", "^", (0, 12)),
     ]:
@@ -450,7 +450,7 @@ def main():
     ax = fig.add_axes([0.68, 0.25, 0.28, 0.49])
     series = {
         s: [benchmarks[s][f"vision_protocol_image_{n}q"]["end_to_end"]["p50_ms"] for n in [1, 3]]
-        for s in ["dohnuts", "laya-vision"]
+        for s in ["linnaeus", "laya-vision"]
     }
     hbars(ax, ["1 question", "3 questions"], series, 100, "p50 latency (ms) · lower is better")
     ax.set_title("One image per request", loc="left", fontsize=14, weight="bold", pad=16)
@@ -463,7 +463,7 @@ def main():
         [
             "3 warmups and 20 synchronized repetitions. Includes preprocessing and transfers; excludes loading, network and queueing.",
             "Uses each native API, tokenizer and cache behavior. Image timings are warm, not uncached image-encoder timings.",
-            f"Laya uses the fixed same-hardware baseline; Dohnuts uses {checkpoint['model_id']}. Jev API latency is not mixed into this chart.",
+            f"Laya uses the fixed same-hardware baseline; Linnaeus uses {checkpoint['model_id']}. Jev API latency is not mixed into this chart.",
         ],
         "Same-hardware inference latency",
     )
@@ -475,7 +475,7 @@ def main():
     )
     segments = [
         ("both_correct", "Both correct", "#24677B"),
-        ("dohnuts_only_correct", "Only Dohnuts correct", "#6EADAE"),
+        ("linnaeus_only_correct", "Only Linnaeus correct", "#6EADAE"),
         ("reference_only_correct", "Only reference correct", "#C88B4D"),
         ("both_wrong", "Both wrong", "#D5DCE1"),
     ]
@@ -517,7 +517,7 @@ def main():
             record(
                 "06_agreement",
                 system,
-                "Dohnuts vs " + system,
+                "Linnaeus vs " + system,
                 key,
                 value,
                 231,
@@ -539,7 +539,7 @@ def main():
         record(
             "06_agreement",
             system,
-            "Dohnuts vs " + system,
+            "Linnaeus vs " + system,
             "exact_answer_agreement",
             count,
             231,

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import torch
 
-from dohnuts.model import DecisionModel, model_revision
+from linnaeus.model import DecisionModel, model_revision
 
 GIB = 1024**3
 

@@ -34,7 +34,7 @@ benchmark does not certify its annotation quality or commercial training rights.
 
 ## Evaluation alignment
 
-| Reference | Actual evaluation/training practice | Dohnuts treatment |
+| Reference | Actual evaluation/training practice | Linnaeus treatment |
 | --- | --- | --- |
 | [Laya benchmarks](https://github.com/NandhaKishorM/laya/blob/d113dca2512fb3eaca313534bc54c7162d87c1d4/BENCHMARKS.md) | MASSIVE uses 20 candidate intents across languages; XNLI uses three entailment labels; public classifiers include AG News, emotion and BANKING77 | Train/evaluate MASSIVE en-US and zh-CN with all 60 intents; XNLI en/zh; AG News 4, emotion 6, BANKING77 77. These are not the published 51-language/20-candidate MASSIVE setting. |
 | [typed-decisions](https://huggingface.co/datasets/LocalLLaMA/typed-decisions) | 1,200 training cases / 6,000 decisions and 400 test cases / 2,000 decisions; labels average three teacher samples | Keep state-level groups and soft distributions. Results measure teacher agreement, not independent real-world correctness. Reserve train groups for development and calibration. |
@@ -83,4 +83,4 @@ comparison. Official held-out partitions and any verifiable upstream training
 ID exclusions must be identified before making a competitive quality claim.
 Reference CPU evaluation uses the published FP32 weights and temperatures, with
 2048-token total/head budgets to retain all candidates; upstream still applies
-its 48-token per-option cap. Dohnuts uses BF16 with its own full-candidate template.
+its 48-token per-option cap. Linnaeus uses BF16 with its own full-candidate template.

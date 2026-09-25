@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from dohnuts.metrics import by_dataset
+from linnaeus.metrics import by_dataset
 
 
 def read_json(path):
@@ -37,11 +37,11 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     checkpoint = args.run / "checkpoint"
     display_names = {
-        "dohnuts": "Dohnuts",
+        "linnaeus": "Linnaeus",
         "laya": "Laya multilingual",
         "laya-vision": "Laya Vision",
     }
-    metadata = read_json(checkpoint / "dohnuts.json")
+    metadata = read_json(checkpoint / "linnaeus.json")
     selected = Path(metadata["selected_run"])
     evaluation = read_json(selected / "evaluation.json")
     tables = {
@@ -135,9 +135,9 @@ def main():
             continue
         ids = {row["id"] for row in read_rows(directory / "predictions.jsonl")}
         if not ids <= own_ids:
-            raise ValueError(f"{engine} includes IDs absent from the Dohnuts final predictions")
+            raise ValueError(f"{engine} includes IDs absent from the Linnaeus final predictions")
         references[engine] = {
-            "dohnuts_on_same_ids": by_dataset(
+            "linnaeus_on_same_ids": by_dataset(
                 [r for r in predictions if r["id"] in ids], metadata["temperatures"]
             ),
             **read_json(directory / "report.json"),
@@ -160,7 +160,7 @@ def main():
     summary |= {
         "scope": [
             "One seed; variation across seeds is unmeasured. Development selects weights; calibration fits temperatures; test never selects either.",
-            "Laya references use their own templates, FP32 CPU weights and published temperatures; Dohnuts uses merged BF16 weights.",
+            "Laya references use their own templates, FP32 CPU weights and published temperatures; Linnaeus uses merged BF16 weights.",
             "Laya Vision has VQAv2 source-pool and A-OKVQA selection exposure. Backbone pretraining exposure is unverified.",
             "Bub acceptance verifies local decision-tool calls, not autonomous planning quality.",
             "Source model, dataset and image terms apply; this report does not assign a new weight license.",
@@ -272,12 +272,12 @@ def main():
             "",
             "### Reference comparisons",
             "",
-            "| Same-ID reference | Dohnuts macro accuracy | Reference macro accuracy |",
+            "| Same-ID reference | Linnaeus macro accuracy | Reference macro accuracy |",
             "| --- | ---: | ---: |",
         ]
     for name, value in references.items():
         lines.append(
-            f"| {display_names.get(name, name)} | {value['dohnuts_on_same_ids']['macro_accuracy']:.2%} | "
+            f"| {display_names.get(name, name)} | {value['linnaeus_on_same_ids']['macro_accuracy']:.2%} | "
             f"{value['metrics']['macro_accuracy']:.2%} |"
         )
     lines += [
@@ -314,7 +314,7 @@ def main():
         "## Use",
         "",
         "```python",
-        "from dohnuts.predictor import Predictor",
+        "from linnaeus.predictor import Predictor",
         f'model = Predictor.from_checkpoint("{checkpoint}")',
         "```",
         "",

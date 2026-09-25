@@ -9,7 +9,7 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from dohnuts.recipe import (
+from linnaeus.recipe import (
     BASE_MODEL,
     BASE_MODEL_ID,
     BASE_REVISION,
@@ -17,8 +17,8 @@ from dohnuts.recipe import (
     TRAINING_STEPS,
     training_recipe,
 )
-from dohnuts.rlcd import RLCDConfig
-from dohnuts.train import file_hash
+from linnaeus.rlcd import RLCDConfig
+from linnaeus.train import file_hash
 
 
 def main():
@@ -193,7 +193,7 @@ def main():
             f"evaluate-{recipe['seed']}",
             "accept-checkpoint",
             "audit-quality",
-            "bench-dohnuts",
+            "bench-linnaeus",
             "jevbench",
             "laya-chart",
             "report",
@@ -205,7 +205,7 @@ def main():
             path = args.output / name
             if path.exists():
                 shutil.rmtree(path)
-        (args.output / "benchmarks/dohnuts.jsonl").unlink(missing_ok=True)
+        (args.output / "benchmarks/linnaeus.jsonl").unlink(missing_ok=True)
         temporary = completed.with_suffix(".tmp")
         temporary.write_text(json.dumps(done, indent=2) + "\n")
         temporary.replace(completed)
@@ -222,7 +222,7 @@ def main():
         python(
             f"train-{seed}",
             "-m",
-            "dohnuts.train",
+            "linnaeus.train",
             "train",
             "--config",
             config,
@@ -237,7 +237,7 @@ def main():
     python(
         f"evaluate-{seed}",
         "-m",
-        "dohnuts.train",
+        "linnaeus.train",
         "evaluate",
         "--config",
         config,
@@ -305,13 +305,13 @@ def main():
             )
     benchmarks = args.output / "benchmarks"
     benchmarks.mkdir(exist_ok=True)
-    for engine in ["dohnuts", "laya", "laya-vision"]:
-        if engine == "dohnuts":
+    for engine in ["linnaeus", "laya", "laya-vision"]:
+        if engine == "linnaeus":
             if "benchmarks" in skip:
                 continue
         elif "references" in skip:
             continue
-        extra = ["--checkpoint", checkpoint] if engine == "dohnuts" else []
+        extra = ["--checkpoint", checkpoint] if engine == "linnaeus" else []
         python(
             f"bench-{engine}",
             "scripts/benchmark.py",

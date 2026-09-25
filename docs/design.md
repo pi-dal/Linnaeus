@@ -10,7 +10,7 @@ Reference protocols <upstream-alignment>
 Benchmarking <local-benchmarks>
 ```
 
-Dohnuts accepts a state and independent questions and returns temperature-scaled
+Linnaeus accepts a state and independent questions and returns temperature-scaled
 probabilities over supplied candidates. The training and serving templates are
 shared. A request reuses its causal prefix and computes question suffixes in
 parallel. Frozen image features are encoded on a cache miss and shared. More

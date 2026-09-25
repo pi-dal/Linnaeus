@@ -24,7 +24,7 @@ def test_hf_manifest_url_uses_mirror_without_touching_other_sources(monkeypatch)
 
 
 def test_short_training_smoke_uses_separate_dev_recipe():
-    from dohnuts.recipe import training_recipe
+    from linnaeus.recipe import training_recipe
 
     assert training_recipe(dev_cap=8)["dev_cap"] == 8
     assert training_recipe()["dev_cap"] == 256

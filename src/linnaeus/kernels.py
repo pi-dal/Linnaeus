@@ -10,7 +10,7 @@ def fused_rms_norm(module, hidden):
     # FLA 0.5.2 accepts bias=None, but its annotation omits None.
     return rms_norm(
         hidden,
-        module._dohnuts_norm_weight,
+        module._linnaeus_norm_weight,
         None,  # ty: ignore[invalid-argument-type]
         eps=module.eps,
     )
@@ -49,7 +49,7 @@ def enable_fusion(backbone):
     for module in backbone.modules():
         if isinstance(module, qwen.Qwen3_5RMSNorm):
             module.register_buffer(
-                "_dohnuts_norm_weight", module.weight.detach().float() + 1, persistent=False
+                "_linnaeus_norm_weight", module.weight.detach().float() + 1, persistent=False
             )
         if type(module) in functions:
             module.forward = MethodType(functions[type(module)], module)

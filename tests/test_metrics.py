@@ -2,11 +2,11 @@ import math
 
 import pytest
 
-from dohnuts.metrics import fit_temperatures, summarize
+from linnaeus.metrics import fit_temperatures, summarize
 
 
 def test_twenty_latency_samples_do_not_report_maximum_as_p95():
-    from dohnuts.experiment import latency_stats
+    from linnaeus.experiment import latency_stats
 
     result = latency_stats(list(range(1, 21)), 1)
     assert result["p95_ms"] == pytest.approx(19.05, rel=0, abs=5e-8)

@@ -15,7 +15,7 @@ mise run docs-preview
 
 Open `http://localhost:8000`. The generated files are in `build/site`.
 `mise run sync-docs` selects only the `docs` group from `uv.lock`, without
-installing the project or its model dependencies. The build does not import Dohnuts,
+installing the project or its model dependencies. The build does not import Linnaeus,
 execute the examples, load models, train, or download datasets.
 
 Keep navigation in the existing MyST `toctree` directives. Use `docs/conf.py`

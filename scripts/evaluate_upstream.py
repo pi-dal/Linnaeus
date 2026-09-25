@@ -12,9 +12,9 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from dohnuts.metrics import by_dataset
-from dohnuts.train import file_hash
-from dohnuts.training_data import load_records
+from linnaeus.metrics import by_dataset
+from linnaeus.train import file_hash
+from linnaeus.training_data import load_records
 
 
 def main():

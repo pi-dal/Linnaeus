@@ -4,7 +4,7 @@ import tomllib
 from pathlib import Path
 
 metadata = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
-project = "Dohnuts"
+project = "Linnaeus"
 release = metadata["project"]["version"]
 language = "en"
 
@@ -23,7 +23,7 @@ myst_heading_anchors = 4
 
 html_theme = "furo"
 html_title = project
-html_logo = "../assets/dohnuts-logo.png"
+html_logo = "../assets/linnaeus-logo.png"
 html_favicon = html_logo
 html_static_path = ["_static"]
 html_css_files = ["brand.css"]
@@ -33,7 +33,7 @@ html_domain_indices = False
 html_use_index = False
 html_theme_options = {
     "sidebar_hide_name": False,
-    "source_repository": "https://github.com/PsiACE/dohnuts/",
+    "source_repository": "https://github.com/pi-dal/Linnaeus/",
     "source_branch": "main",
     "source_directory": "",
     "light_css_variables": {

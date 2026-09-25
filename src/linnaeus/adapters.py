@@ -8,8 +8,8 @@ import torch
 from peft import LoraConfig, get_peft_model
 from transformers import AutoModel, AutoProcessor
 
-from dohnuts.execution import language_forward
-from dohnuts.recipe import IMAGE_PIXELS
+from linnaeus.execution import language_forward
+from linnaeus.recipe import IMAGE_PIXELS
 
 
 class Qwen35Adapter:
@@ -25,7 +25,7 @@ class Qwen35Adapter:
         return AutoProcessor.from_pretrained(checkpoint, local_files_only=True)
 
     def load(self, checkpoint):
-        from dohnuts.kernels import (
+        from linnaeus.kernels import (
             enable_fusion,
             enable_linear_patch_embedding,
             enable_triton_convolution,
@@ -50,7 +50,7 @@ class Qwen35Adapter:
         backbone.config.use_cache = False
         enable_linear_patch_embedding(backbone.visual)
         enable_fusion(backbone)
-        backbone._dohnuts_image_cache = OrderedDict()
+        backbone._linnaeus_image_cache = OrderedDict()
         return backbone
 
     def hidden_size(self, backbone):
@@ -167,7 +167,7 @@ class Qwen35Adapter:
 
     def image_features(self, backbone, inputs):
         """The frozen encoder has a model-local 128 MiB LRU; no language state persists."""
-        cache = backbone._dohnuts_image_cache
+        cache = backbone._linnaeus_image_cache
         pixels = inputs["pixel_values"].split(inputs["image_patches"])
         missing = {}
         for i, key in enumerate(inputs["image_keys"]):

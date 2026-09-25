@@ -1,4 +1,4 @@
-"""The Dohnuts training and evaluation recipe.
+"""The Linnaeus training and evaluation recipe.
 
 Values are recorded in each run for reproducibility. They are product defaults,
 not a configuration surface. Model-specific behavior belongs in an adapter.
@@ -6,7 +6,7 @@ not a configuration surface. Model-specific behavior belongs in an adapter.
 
 from pathlib import Path
 
-from dohnuts.rlcd import RLCDConfig
+from linnaeus.rlcd import RLCDConfig
 
 IMAGE_PIXELS = 512**2
 MAX_LENGTH = 2048
