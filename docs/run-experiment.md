@@ -14,6 +14,11 @@ uv run python scripts/run_experiment.py
 The Qwen3.5 adapter limits PyTorch's caching allocator to 80% of visible VRAM
 by default. On a headless server, raise it with `LINNAEUS_VRAM_FRACTION=0.95`.
 
+On hosts without direct Hugging Face or GitHub access (e.g. mainland China
+servers) set `HF_ENDPOINT=https://hf-mirror.com` and `HF_HUB_DISABLE_XET=1`;
+see [OpenBayes deployment](openbayes.md) for the full mirror matrix and
+fallback sources.
+
 The script downloads the pinned base and public datasets when absent, converts
 the complete mixture, isolates related examples and identical images across
 splits, and freezes token eligibility. It trains seed 42 for 3,600 optimizer updates,

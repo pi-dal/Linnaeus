@@ -23,8 +23,6 @@ myst_heading_anchors = 4
 
 html_theme = "furo"
 html_title = project
-html_logo = "../assets/linnaeus-logo.png"
-html_favicon = html_logo
 html_static_path = ["_static"]
 html_css_files = ["brand.css"]
 html_show_sourcelink = False

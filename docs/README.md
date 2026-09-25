@@ -5,6 +5,7 @@
 - [Installation and inference](inference.md): load a checkpoint and make text or image decisions.
 - [Agent integration](bub-agent.md): expose decisions through the Bub SDK.
 - [Training and evaluation](run-experiment.md): run the complete workflow or resume training.
+- [OpenBayes deployment](openbayes.md): NVIDIA cloud layout, China-network mirrors, and resume semantics.
 
 ## Understand the model
 
@@ -33,4 +34,5 @@ Agent integration <bub-agent>
 Training and evaluation <run-experiment>
 Development <development>
 Build the website <website>
+OpenBayes deployment <openbayes>
 ```

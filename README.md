@@ -1,5 +1,3 @@
-<img src="assets/linnaeus-logo.png" width="160" align="right" alt="A pink-frosted doughnut doing a facepalm">
-
 # Linnaeus
 
 **CUDA-optimized small multimodal decision models.** Forked from an AMD ROCm
@@ -87,8 +85,6 @@ The [training guide](docs/run-experiment.md) covers setup and resuming a run.
 The [model card](MODEL_CARD.md) reports quality, latency, and limitations. For
 agents, [Bub integration](docs/bub-agent.md) exposes the same interface as one
 decision tool through the Bub SDK.
-
-![Linnaeus 0.1.0 model overview and benchmarks](docs/figures/overview.svg)
 
 ## Benchmarks
 
@@ -211,6 +207,13 @@ Linnaeus-0.1.0-2B was trained on a rented NVIDIA RTX 4090 with the upstream
 recipe unchanged: rank-8 LoRA plus decision head, joint RLCD + cross-entropy,
 3,600 steps, ~3.4 h of GPU training, checkpoint selected by development macro
 accuracy.
+
+## Acknowledgements
+
+Linnaeus is a CUDA retarget of the upstream [Dohnuts](https://github.com/PsiACE/dohnuts)
+project by PsiACE. The training recipe (RLCD + cross-entropy), data mixture,
+isolation rules, evaluation protocol, and execution design are theirs; the
+baseline numbers quoted throughout come from their published artifacts.
 
 ## License
 
