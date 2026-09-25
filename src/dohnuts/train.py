@@ -500,6 +500,7 @@ def main():
         workers=config["workers"],
         eval_batch_size=config["eval_batch_size"],
         cpu_threads=config["cpu_threads"],
+        dev_cap=config["dev_cap"],
     )
     if config != expected:
         raise ValueError("Training uses the fixed recipe, RLCD controls, and step budget")

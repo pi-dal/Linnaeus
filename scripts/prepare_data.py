@@ -12,6 +12,7 @@ import hashlib
 import io
 import json
 import mailbox
+import os
 import re
 import shutil
 import subprocess
@@ -22,6 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from email import policy
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import pyarrow.parquet as pq
 from PIL import Image
@@ -511,6 +513,20 @@ def isolate(data, audit):
         yield r
 
 
+def download_url(url):
+    """Route HF manifest URLs via HF_ENDPOINT without changing source provenance."""
+    mirror = os.environ.get("HF_ENDPOINT")
+    source = urlsplit(url)
+    if not mirror or source.hostname != "huggingface.co":
+        return url
+    endpoint = urlsplit(mirror)
+    if endpoint.scheme != "https" or not endpoint.netloc or endpoint.path.rstrip("/"):
+        raise ValueError("HF_ENDPOINT must be an HTTPS origin without a path")
+    return urlunsplit(
+        (endpoint.scheme, endpoint.netloc, source.path, source.query, source.fragment)
+    )
+
+
 def download_file(item):
     path = Path(item["path"])
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -528,7 +544,7 @@ def download_file(item):
                 "30",
                 "--output",
                 str(partial),
-                item["url"],
+                download_url(item["url"]),
             ],
             check=True,
         )
@@ -558,8 +574,9 @@ def download_sources():
 
 
 def extract_archives():
-    # Each archive is deleted right after its own extraction: peak disk stays
-    # near the download total (~36 GB) instead of download + extracted (~58 GB).
+    # Delete each archive after extraction to reduce steady-state disk use.
+    # download_sources() fetched all archives first, so peak during extraction
+    # still includes the archive and its extracted files; monitor free space.
     massive = Path("data/raw/massive/massive-1.1.tar.gz")
     with tarfile.open(massive) as archive:
         for lang in ["en-US", "zh-CN"]:

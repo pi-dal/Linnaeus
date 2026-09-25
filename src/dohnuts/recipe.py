@@ -30,9 +30,12 @@ def training_recipe(
     workers=2,
     eval_batch_size=16,
     cpu_threads=8,
+    dev_cap=256,
 ):
     if not isinstance(steps, int) or steps < 1:
         raise ValueError("Training steps must be a positive integer")
+    if not isinstance(dev_cap, int) or dev_cap < 1:
+        raise ValueError("Development cap must be a positive integer")
     policy = rlcd or RLCDConfig()
     recipe = {
         "model": str(model),
@@ -46,7 +49,7 @@ def training_recipe(
         "backbone_lr": 1e-4,
         "head_lr": 5e-4,
         "train_cap": 6000,
-        "dev_cap": 256,
+        "dev_cap": dev_cap,
         "image_pixels": IMAGE_PIXELS,
         "max_length": MAX_LENGTH,
         "cpu_threads": cpu_threads,

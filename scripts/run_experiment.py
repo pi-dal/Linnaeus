@@ -62,6 +62,12 @@ def main():
         "--cpu-threads", type=int, default=8, help="Torch CPU threads for collation"
     )
     parser.add_argument(
+        "--dev-cap", type=int, default=256, help="Development rows per group; use a fresh --output"
+    )
+    parser.add_argument(
+        "--train-only", action="store_true", help="Stop after training, without export or full test"
+    )
+    parser.add_argument(
         "--skip",
         default="",
         help="Comma-separated stage groups to skip: "
@@ -96,6 +102,7 @@ def main():
         workers=args.workers,
         eval_batch_size=args.eval_batch_size,
         cpu_threads=args.cpu_threads,
+        dev_cap=args.dev_cap,
     )
     args.output.mkdir(parents=True, exist_ok=True)
     logs = args.output / "logs"
@@ -145,6 +152,10 @@ def main():
         (args.data / (split + ".jsonl")).exists()
         for split in ["train", "dev", "calibration", "test"]
     ):
+        # OpenBayes scratch storage disappears on container restart, whereas
+        # completed.json lives on persistent /output. Never skip preparation
+        # solely because a prior command was recorded as complete.
+        done.pop("prepare-data", None)
         python(
             "prepare-data", "scripts/prepare_data.py", "--output", args.data, "--model", args.model
         )
@@ -220,6 +231,9 @@ def main():
             *resume,
             *initialize,
         )
+    if args.train_only:
+        print(json.dumps({"training_run": str(directory), "status": "train_only"}), flush=True)
+        return
     python(
         f"evaluate-{seed}",
         "-m",
