@@ -30,6 +30,44 @@ On hosts without direct Hugging Face access: `export HF_ENDPOINT=https://hf-mirr
 
 ---
 
+## What changed from upstream
+
+**Recipe**: identical — rank-8 LoRA + decision head, joint RLCD + cross-entropy,
+same data mixture, same isolation/split rules, same checkpoint-selection
+protocol. Only the backbone moved (Qwen3.5-0.8B → 2B) and it is now a flag.
+
+**Runtime and training ops**
+
+- `--base-repo` / `--base-revision` swap the pinned backbone;
+  `--lora-rank`, `--workers`, `--eval-batch-size`, `--cpu-threads`, `--dev-cap`
+  are recipe-level knobs
+- `--skip` stage groups and `--train-only` for cheap smoke runs
+  (50-step pipeline check in ~8 min instead of a full day)
+- fused AdamW on CUDA, `prefetch_factor=4` training loader, per-worker image
+  decode cache (LRU 128), `expandable_segments` allocator
+- restart-safe stages: `prepare-data` re-verifies its outputs against
+  scratch-disk loss instead of trusting `completed.json`; per-case resume in
+  the Laya benchmark; `curl` stall guard (`--speed-limit/--speed-time`) on all
+  manifest downloads
+- disk reclamation in `prepare-data`: archives deleted right after extraction
+  (~36 GB steady-state instead of ~58 GB)
+- China-network support out of the box: `HF_ENDPOINT` URL rewriting for
+  manifest curl downloads, `HF_HUB_DISABLE_XET` path, ModelScope fallback for
+  model weights
+- PDM → uv + `mise.toml` toolchain; `fla` lazy-imported so macOS still runs
+  lint/typecheck/tests without Triton wheels
+
+**Results** (details in [Benchmarks](#benchmarks))
+
+- Held-out macro accuracy **80.78%** vs upstream 78.21% — 20 wins / 6 ties /
+  0 losses across 26 groups
+- JevBench public 231 tasks **73.16%** vs upstream 65.80% — top of the ~2B
+  local-model class
+- XNLI 15-language **76.0%** — recovers the suite upstream lost to Laya
+  multilingual
+
+---
+
 Linnaeus builds small multimodal models for direct decisions. Give the model a
 message, a document, or an image, and ask it to choose, judge, or score. It returns
 probabilities in a single forward pass, with multiple questions sharing the same
