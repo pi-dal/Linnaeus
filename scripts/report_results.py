@@ -284,7 +284,7 @@ def main():
         "",
         "### Inference speed",
         "",
-        "Warm RX 7900 XTX end-to-end predict latency, including preprocessing and transfers.",
+        "Warm single-GPU BF16 end-to-end predict latency, including preprocessing and transfers.",
         "Three warmups and 20 synchronized repetitions; network and queueing excluded.",
         "",
         "| Engine | Workload | p50 ms | p95 ms | Decisions/s |",

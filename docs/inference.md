@@ -30,7 +30,7 @@ Run Python examples with `uv run python` from the repository root:
 ```python
 from linnaeus.predictor import Predictor
 
-model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
+model = Predictor.from_checkpoint("pi-dal/Linnaeus-0.1.0-2B")
 ```
 
 The loader verifies the checkpoint's weight checksum and base revision, merges

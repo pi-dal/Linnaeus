@@ -1,6 +1,6 @@
 # RLCD implementation
 
-The Dohnuts training recipe keeps the Qwen3.5-0.8B vision encoder frozen and trains language LoRA adapters
+The Linnaeus training recipe keeps the Qwen3.5-0.8B vision encoder frozen and trains language LoRA adapters
 (rank 8, alpha 16) plus a shared candidate scorer.
 The pinned base is `Qwen/Qwen3.5-0.8B` revision
 `2fc06364715b967f1860aea9cf38778875588b17`.

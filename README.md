@@ -2,10 +2,11 @@
 
 # Linnaeus
 
-**NVIDIA-optimized fork of [Dohnuts](https://github.com/PsiACE/dohnuts).**
+**CUDA-optimized small multimodal decision models.** Forked from an AMD ROCm
+research project; the same recipe, retargeted to NVIDIA servers.
 
-Upstream trains and evaluates on AMD ROCm (RX 7900 XTX). Linnaeus retargets the
-same recipe to CUDA servers:
+The upstream project trains and evaluates on AMD ROCm (RX 7900 XTX). Linnaeus
+retargets the same recipe to CUDA:
 
 - torch/torchvision pinned to `+cu128` builds via a dedicated package index
   (`pyproject.toml`); FLA's Triton kernels run unchanged on CUDA
@@ -40,8 +41,6 @@ The Python toolkit covers training, inference, evaluation, and agent integration
 The model runs locally on a consumer GPU.
 
 [Linnaeus-0.1.0-2B](https://huggingface.co/pi-dal/Linnaeus-0.1.0-2B) · [Model card](MODEL_CARD.md) · [Documentation](docs/README.md) · [Benchmarks](docs/figures/README.md)
-
-Upstream reference: [Dohnuts-0.1.0-0.8B](https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B).
 
 ## One message, several decisions
 
@@ -85,22 +84,96 @@ uv run python scripts/run_experiment.py
 ```
 
 The [training guide](docs/run-experiment.md) covers setup and resuming a run.
-The [model card](MODEL_CARD.md) reports quality, latency, and limitations, with
-comparisons against Jev, Laya multilingual, and Laya Vision. For agents,
-[Bub integration](docs/bub-agent.md) exposes the same interface as one decision
-tool through the Bub SDK.
+The [model card](MODEL_CARD.md) reports quality, latency, and limitations. For
+agents, [Bub integration](docs/bub-agent.md) exposes the same interface as one
+decision tool through the Bub SDK.
 
-![Dohnuts 0.1.0 model overview and benchmarks](docs/figures/overview.svg)
+![Linnaeus 0.1.0 model overview and benchmarks](docs/figures/overview.svg)
 
-## Built at home
+## Benchmarks
 
-We developed, trained, calibrated, and evaluated Dohnuts on a home PC with one
-AMD Radeon RX 7900 XTX (24 GB). We used hardware we already owned and a $0
-additional project budget. The main ingredient was time.
+Held-out **macro accuracy 80.78%** over 26 task groups (180,031 test examples),
+temperature-calibrated on an independent partition. Same recipe, same harness,
+same data as the upstream baseline — only the backbone changed
+(`Qwen/Qwen3.5-0.8B` → `Qwen/Qwen3.5-2B`, revision pinned).
+
+| Model | Backbone | Test macro accuracy | vs 26 groups |
+| --- | --- | ---: | --- |
+| **Linnaeus-0.1.0-2B** | Qwen3.5-2B | **80.78%** | 20 wins / 6 ties / 0 losses |
+| Dohnuts-0.1.0-0.8B (upstream) | Qwen3.5-0.8B | 78.21% | — |
+
+<details><summary>Per-group accuracy (test split, calibrated)</summary>
+
+| Group | Linnaeus-2B | Dohnuts-0.8B | Δ |
+| --- | ---: | ---: | ---: |
+| scienceqa | 92.66% | 84.58% | +8.1 |
+| esci_us | 57.64% | 51.00% | +6.6 |
+| sharc | 73.19% | 66.80% | +6.4 |
+| clevr_count | 89.72% | 83.50% | +6.2 |
+| aokvqa | 83.66% | 78.12% | +5.5 |
+| vqav2_yesno | 85.88% | 80.82% | +5.1 |
+| boolq | 87.71% | 82.97% | +4.7 |
+| esci_es | 60.26% | 56.07% | +4.2 |
+| contract_nli | 85.59% | 81.50% | +4.1 |
+| xnli_en | 87.20% | 83.77% | +3.4 |
+| esci_jp | 63.81% | 60.62% | +3.2 |
+| xnli_zh | 78.20% | 75.58% | +2.6 |
+| typed_decisions | 73.05% | 71.75% | +1.3 |
+| massive_zh-CN | 76.82% | 75.56% | +1.3 |
+| screenqa_noul | 72.35% | 71.14% | +1.2 |
+| clevr_exist | 98.58% | 97.40% | +1.2 |
+| banking77 | 73.70% | 72.95% | +0.7 |
+| ag_news | 90.04% | 89.49% | +0.6 |
+| clevr_attribute | 98.92% | 98.36% | +0.6 |
+| emotion | 77.00% | 76.45% | +0.6 |
+| wikiqa | 96.17% | 95.94% | +0.2 |
+| mail_spam | 98.95% | 98.83% | +0.1 |
+| sms_spam | 99.37% | 99.37% | −0.0 |
+| mail_phishing | 98.95% | 99.24% | −0.3 |
+| massive_en-US | 78.89% | 79.19% | −0.3 |
+| screenqa_choice | 22.05% | 22.41% | −0.4 |
+
+</details>
+
+Vision and product-intent groups gain the most; nothing regresses beyond noise
+(`screenqa_choice` is hard for both models at ~22%).
+
+### Latency
+
+Warm single-GPU BF16 predict latency, RTX 4090, merged LoRA (3 warmups, 20
+repetitions; load/network excluded):
+
+| Workload | p50 | Decisions/s |
+| --- | ---: | ---: |
+| Text, 1 question | 46.8 ms | 21.3 |
+| Text, 50 questions | 122.4 ms | 407.7 |
+| Image, 1 question | 49.9 ms | 19.9 |
+| Image, 3 questions | 100.8 ms | 29.6 |
+
+Upstream-published references on the same harness (RX 7900 XTX, not our
+measurement — hardware differs): Dohnuts-0.1.0-0.8B text 1q 15.1 ms, text 50q
+112.5 ms, image 1q 24.4 ms; Laya multilingual 9.8 ms text 1q, no image path;
+Laya Vision 75.4 ms image 1q.
+
+### External suites (upstream-published)
+
+Reported by the upstream project, not re-measured on our checkpoint:
+
+- JevBench v1.2.2, 231 public tasks: Dohnuts-0.1.0-0.8B **65.80%**, Laya
+  multilingual 47.62%, Laya Vision 48.05%
+- 51-language MASSIVE suite: Dohnuts-0.1.0-0.8B leads Laya multilingual; Laya
+  leads the 15-language XNLI suite
+
+## Provenance
+
+Linnaeus-0.1.0-2B was trained on a rented NVIDIA RTX 4090 with the upstream
+recipe unchanged: rank-8 LoRA plus decision head, joint RLCD + cross-entropy,
+3,600 steps, ~3.4 h of GPU training, checkpoint selected by development macro
+accuracy.
 
 ## License
 
-The code is licensed under [Apache-2.0](LICENSE). The model weights are licensed
-under [CC BY-NC-SA 4.0](https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B/blob/main/LICENSE)
-for non-commercial research. See the [model card](MODEL_CARD.md#license) for
+The code is licensed under [Apache-2.0](LICENSE). Model weights are released
+under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) for
+non-commercial research. See the [model card](MODEL_CARD.md#license) for
 checkpoint terms and training-data restrictions.

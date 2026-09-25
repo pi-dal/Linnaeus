@@ -6,7 +6,7 @@ build-backend = "uv_build"
 name = "linnaeus"
 version = "0.1.0"
 readme = "README.md"
-description = "NVIDIA-optimized fork of Dohnuts: small multimodal models for direct decisions."
+description = "Linnaeus: NVIDIA-optimized small multimodal models for direct decisions."
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12,<3.15"
@@ -39,8 +39,7 @@ docs = ["sphinx==9.1.0", "furo==2025.12.19", "myst-parser==5.1.0"]
 plot = ["matplotlib==3.11.2", "numpy==2.5.3"]
 
 [project.urls]
-Upstream = "https://github.com/PsiACE/dohnuts"
-Models = "https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B"
+Models = "https://huggingface.co/pi-dal/Linnaeus-0.1.0-2B"
 
 [tool.uv]
 package = true

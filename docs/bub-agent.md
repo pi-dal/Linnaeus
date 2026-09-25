@@ -17,7 +17,7 @@ from pathlib import Path
 from linnaeus.bub_agent import create_agent
 from linnaeus.predictor import Predictor
 
-predictor = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
+predictor = Predictor.from_checkpoint("pi-dal/Linnaeus-0.1.0-2B")
 framework, agent = create_agent(
     predictor, workspace=Path.cwd(), tape_directory=Path("runs/agent-tapes")
 )

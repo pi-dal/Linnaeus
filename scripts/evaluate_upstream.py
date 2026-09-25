@@ -1,4 +1,4 @@
-"""Pinned upstream quality references on the exact Dohnuts evaluation example IDs.
+"""Pinned upstream quality references on the exact upstream evaluation example IDs.
 
 This is an evaluation utility; Laya Agents are used only to measure the reference checkpoints.
 Raw model logits are captured before the API's four-decimal output rounding.

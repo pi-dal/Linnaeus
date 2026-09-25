@@ -1,191 +1,100 @@
-# Dohnuts-0.1.0-0.8B
+# Linnaeus-0.1.0-2B
 
-A multimodal decision model built on Qwen3.5-0.8B. It scores supplied candidates
-from text and images, returning candidate probabilities, truth estimates, or
-ordered scores. Independent questions about one input share computation in a
-single forward pass. The interface returns decisions without generating reasoning
-or free-form answers.
+Built on Qwen/Qwen3.5-2B, this checkpoint returns decision distributions from text and images. It supports candidate selection (`choice`), truth estimates (`noul`), and ordered scores (`score`) without generating reasoning or free-form responses.
 
 ## Model details
 
 | Property | Value |
 | --- | --- |
-| Base model | Qwen/Qwen3.5-0.8B |
-| Training | Joint RLCD and auxiliary cross-entropy; language LoRA and a candidate scorer |
-| Selection | Seed 42, update 3,600; highest development macro accuracy |
-| Calibration | One temperature per decision type, fitted on an independent partition |
-| Runtime | Merged LoRA, BF16, fused operations, shared input prefixes |
-| Inputs | Text and one decoded image; 2–128 candidates per question |
-| Context | 4,096 tokens per question at inference; 2,048 during training |
-| Hardware used | One AMD Radeon RX 7900 XTX, 24 GB |
+| Base model | Qwen/Qwen3.5-2B |
+| Selection | Seed 42, update 2,800 |
+| Inference | merged LoRA, BF16, fused operations, shared-prefix parallel candidate scoring |
+| Inputs | Text and one PIL image; 2–128 candidates; 4,096 tokens per question |
+
+Questions reuse a shared input prefix and compute their suffixes in parallel. Additional questions still require computation.
+
+## Training
+
+The training recipe combines RLCD and auxiliary cross-entropy, following the pinned Laya and Laya Vision references. Temperature calibration uses an independent partition after LoRA merging. Calibration quality is measured below.
+
+[Training recipe](../recipe.json) · [RLCD implementation and upstream attribution](../../../docs/rlcd.md)
+
+## Evaluation
+
+Held-out macro accuracy: 80.78%.
+
+| Dataset | N | Accuracy | NLL before / after calibration | ECE before / after |
+| --- | ---: | ---: | ---: | ---: |
+| ag_news | 7600 | 90.04% | 0.8728 / 0.5378 | 0.0832 / 0.0710 |
+| aokvqa | 1138 | 83.66% | 0.6347 / 0.4746 | 0.0930 / 0.0513 |
+| banking77 | 3080 | 73.70% | 1.0536 / 1.1711 | 0.0275 / 0.2001 |
+| boolq | 3270 | 87.71% | 0.3854 / 0.3288 | 0.0610 / 0.0648 |
+| clevr_attribute | 53734 | 98.92% | 0.1687 / 0.1230 | 0.0100 / 0.0095 |
+| clevr_count | 35422 | 89.72% | 0.7159 / 0.2652 | 0.0793 / 0.0077 |
+| clevr_exist | 20196 | 98.58% | 0.2526 / 0.0955 | 0.0137 / 0.0127 |
+| contract_nli | 1173 | 85.59% | 0.5014 / 0.4020 | 0.0888 / 0.0338 |
+| emotion | 2000 | 77.00% | 0.7237 / 0.6812 | 0.0777 / 0.0488 |
+| esci_es | 1482 | 60.26% | 0.9241 / 0.9775 | 0.0342 / 0.1266 |
+| esci_jp | 1633 | 63.81% | 0.8878 / 0.9531 | 0.0349 / 0.1410 |
+| esci_us | 1145 | 57.64% | 0.9185 / 0.9712 | 0.0489 / 0.0868 |
+| mail_phishing | 1050 | 98.95% | 0.1327 / 0.0467 | 0.0097 / 0.0094 |
+| mail_spam | 854 | 98.95% | 0.1658 / 0.0580 | 0.0105 / 0.0098 |
+| massive_en-US | 2970 | 78.89% | 0.7713 / 0.7944 | 0.0532 / 0.1141 |
+| massive_zh-CN | 2921 | 76.82% | 0.8801 / 0.8552 | 0.0664 / 0.0904 |
+| scienceqa | 2017 | 92.66% | 0.2942 / 0.2049 | 0.0489 / 0.0342 |
+| screenqa_choice | 848 | 22.05% | 2.3429 / 2.4277 | 0.0464 / 0.0603 |
+| screenqa_noul | 2148 | 72.35% | 0.5747 / 0.6116 | 0.0341 / 0.1288 |
+| sharc | 8276 | 73.19% | 0.6671 / 0.6700 | 0.0705 / 0.0547 |
+| sms_spam | 794 | 99.37% | 0.0910 / 0.0319 | 0.0062 / 0.0061 |
+| typed_decisions | 2000 | 73.05% | 0.9068 / 0.9944 | 0.1073 / 0.2750 |
+| vqav2_yesno | 8102 | 85.88% | 0.3962 / 0.4835 | 0.0248 / 0.1920 |
+| wikiqa | 6160 | 96.17% | 0.4844 / 0.1710 | 0.0374 / 0.0322 |
+| xnli_en | 5009 | 87.20% | 0.3602 / 0.3727 | 0.0307 / 0.0601 |
+| xnli_zh | 5009 | 78.20% | 0.5986 / 0.5582 | 0.0824 / 0.0297 |
+
+### Inference speed
+
+Warm RTX 4090 end-to-end predict latency, including preprocessing and transfers.
+Three warmups and 20 synchronized repetitions; network and queueing excluded.
+
+| Engine | Workload | p50 ms | p95 ms | Decisions/s |
+| --- | --- | ---: | ---: | ---: |
+| Linnaeus | vision_protocol_text_1q | 44.53 | 45.29 | 22.4 |
+| Linnaeus | vision_protocol_text_3q | 47.81 | 48.29 | 62.9 |
+| Linnaeus | vision_protocol_image_1q | 49.88 | 51.27 | 19.9 |
+| Linnaeus | vision_protocol_image_3q | 100.83 | 102.87 | 29.6 |
+| Linnaeus | distinct_text_1q | 46.83 | 48.00 | 21.3 |
+| Linnaeus | distinct_text_5q | 94.32 | 95.89 | 52.8 |
+| Linnaeus | distinct_text_10q | 94.83 | 96.16 | 105.1 |
+| Linnaeus | distinct_text_50q | 122.42 | 124.17 | 407.7 |
+
+### Benchmark coverage
+
 
 ## Use
-
-Dohnuts is intended for tasks with explicit candidate answers: routing requests,
-classifying content, estimating whether a condition holds, rating relevance, or
-answering visual questions. An application supplies the choices and decides how
-to act on the returned probabilities.
-
-After [setting up the runtime](docs/inference.md), load the model from Hugging Face:
 
 ```python
 from linnaeus.predictor import Predictor
 
-model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
+model = Predictor.from_checkpoint("runs/2b/checkpoint")
 ```
 
-The compact checkpoint contains LoRA and scorer weights. The loader downloads
-and caches it with the pinned base model, merges LoRA, and applies calibration.
-Weights are not bundled with the Python package. See the [inference guide](docs/inference.md) for question
-definitions, images, and response fields, or [Bub integration](docs/bub-agent.md)
-for agent use.
-
-## Evaluation
-
-![Dohnuts 0.1.0 model overview and benchmarks](docs/figures/overview.svg)
-
-The model achieves **78.21% macro accuracy** over 26 held-out dataset groups
-containing 180,031 decisions. Each group contributes equally to this mean.
-Development data selects weights; calibration data fits temperatures; test data
-does neither. This is one training seed, with no estimate of variation across seeds.
-
-### JevBench
-
-Accuracy on the same 231 public tasks from JevBench v1.2.2:
-
-| Model | Correct | Accuracy |
-| --- | ---: | ---: |
-| Dohnuts-0.1.0-0.8B | 152 / 231 | 65.80% |
-| Jev 1.13.0 | 200 / 231 | 86.58% |
-| Laya multilingual | 110 / 231 | 47.62% |
-| Laya Vision | 111 / 231 | 48.05% |
-
-Jev results use published per-task outcomes; Dohnuts and the two Laya checkpoints
-were measured locally. Dohnuts uses a 4,096-token limit; the Laya runs use their
-native 1,024-token limit and truncation. The other 303 leaderboard tasks are
-unavailable, including the judge tier. These accuracies are not the official
-four-axis leaderboard score.
-
-### Laya task suites
-
-Dohnuts leads the published Laya multilingual reference on the 51-language
-MASSIVE intent suite, at **60.14%** versus **36.61%** language macro accuracy.
-Laya multilingual leads on the 15-language XNLI suite, at **73.84%** versus
-**70.91%**. The upstream question builders are preserved, but the historical
-reference's input hashes are unavailable, so exact input identity cannot be verified.
-
-Against Laya Vision on the same local image examples, Dohnuts scores higher on
-A-OKVQA and VQAv2 yes/no; Laya Vision scores higher on ScienceQA and has lower
-calibration error on ScienceQA and VQAv2. These runs use different precision and
-have reference data-exposure limitations, documented in the
-[comparison protocols](docs/upstream-alignment.md).
-
-The [comparison gallery](docs/figures/README.md) includes every application suite,
-language results, vision accuracy and calibration, and paired JevBench outcomes.
-
-### Inference speed
-
-Warm end-to-end median latency on one RX 7900 XTX, using BF16 and each model's
-native API:
-
-| Workload | Dohnuts | Laya multilingual | Laya Vision |
-| --- | ---: | ---: | ---: |
-| Text, 1 question | 15.07 ms | 9.77 ms | 11.00 ms |
-| Text, 50 questions | 112.51 ms | 47.19 ms | 125.63 ms |
-| Image, 1 question | 24.43 ms | — | 75.41 ms |
-| Image, 3 questions | 35.84 ms | — | 77.89 ms |
-
-Measurements use three warmups and 20 synchronized repetitions, including
-preprocessing and transfers. They exclude model loading, network, and queueing.
-Image timings use warm caches. They do not measure uncached image encoding or
-service throughput under load. See the [full charts](docs/figures/README.md#same-hardware-inference-latency)
-and [benchmark protocol](docs/local-benchmarks.md).
-
-## Training
-
-The mixture covers 26 text, language, and vision task groups, including public
-classification, question-answering, retrieval, policy, mail, and visual datasets.
-A fixed cap provides 143,238 eligible training rows; sampling is uniform over
-groups with replacement. The 3,600 updates process 115,200 sampled examples.
-Related documents and identical images are grouped to prevent cross-split leakage.
-Dataset sources, exclusions, and terms are listed in the
-[data reference](docs/data-and-evaluation.md).
-
-The base model and vision encoder are frozen. Training updates rank-8 language
-LoRA adapters and a shared candidate scorer. The joint RLCD and cross-entropy
-objective follows the pinned Laya and Laya Vision implementations. Its four
-samples perturb decision logits; they are not generated trajectories. LoRA is
-merged before temperature fitting and final evaluation. The
-[RLCD specification](docs/rlcd.md) gives the objective and fixed schedule.
-
-### Training datasets
-
-The 26 training groups are derived from the following source datasets. Hub links
-identify the datasets; the [download manifests](https://github.com/PsiACE/dohnuts/tree/main/data/manifests) pin the files,
-revisions, and checksums actually used, including official archives downloaded
-outside the Hub.
-
-| Task family | Sources |
-| --- | --- |
-| Intent and topic classification | [MASSIVE 1.1](https://huggingface.co/datasets/AmazonScience/massive) (en-US, zh-CN), [AG News](https://huggingface.co/datasets/fancyzhx/ag_news), [BANKING77](https://huggingface.co/datasets/PolyAI/banking77) |
-| Entailment, emotion, and Boolean QA | [XNLI](https://huggingface.co/datasets/facebook/xnli) (en, zh), [emotion](https://huggingface.co/datasets/dair-ai/emotion), [BoolQ](https://huggingface.co/datasets/google/boolq) (SuperGLUE distribution) |
-| Visual decisions | [CLEVR 1.0](https://cs.stanford.edu/people/jcjohns/clevr/), [A-OKVQA](https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA), [ScienceQA](https://huggingface.co/datasets/derek-thomas/ScienceQA) (image subset), [VQAv2](https://huggingface.co/datasets/lmms-lab-encoder/VQAv2) (yes/no) |
-| Screen region decisions | [ScreenQA](https://github.com/google-research-datasets/screen_qa), with [Rico](https://www.interactionmining.org/archive/rico) screenshots and view hierarchies |
-| Typed decisions | [LocalLLaMA/typed-decisions](https://huggingface.co/datasets/LocalLLaMA/typed-decisions), using public soft teacher distributions |
-| Retrieval and relevance | [Amazon ESCI](https://github.com/amazon-science/esci-data) (en, es, ja), [WikiQA](https://huggingface.co/datasets/microsoft/wiki_qa) |
-| Policy and contract decisions | [ShARC](https://huggingface.co/datasets/UCLNLP/sharc), [ContractNLI](https://stanfordnlp.github.io/contract-nli/) |
-| Spam and phishing | [SpamAssassin](https://spamassassin.apache.org/old/publiccorpus/), [Nazario phishing corpus](https://monkey.org/~jose/phishing/), [UCI SMS Spam Collection](https://huggingface.co/datasets/ucirvine/sms_spam) |
-
-JevBench tasks and the frozen Laya benchmark inputs are evaluation-only.
-The [data protocol](docs/data-and-evaluation.md) describes source-specific
-conversions, grouped partitions, exclusions, and terms.
+[Installation, question definitions and response fields](../../../docs/inference.md).
 
 ## Limitations
 
-- Quality depends on the task. Jev leads on the public JevBench tasks; Laya
-  multilingual leads on several application suites and small text-batch latency.
-- Global temperatures do not improve every dataset's calibration. The API's
-  `confidence` field summarizes a distribution; it is not a measured probability
-  of correctness. Check calibration on the intended workload.
-- Candidate wording, order, and input length can affect decisions. Over-budget
-  inputs are rejected. A long-document result covers only the eligible subset.
-- Laya Vision has possible VQAv2 training-pool exposure and A-OKVQA selection
-  exposure. Backbone pretraining exposure is unverified. These comparisons do
-  not establish performance on unseen data for every reference.
-- Bub acceptance exercises the decision tool. It does not measure autonomous
-  planning quality.
+For `choice` and `score`, `confidence` is `1 - H(p) / log(K)`. For `noul`, it is `max(p, 1 - p)`. These distribution summaries are not empirical correctness guarantees; calibration metrics use maximum probability and observed correctness.
+Raw predictions, resource samples, calibration bins and quality diagnostics accompany this report.
 
-## Artifact and provenance
+- One seed; variation across seeds is unmeasured. Development selects weights; calibration fits temperatures; test never selects either.
+- Laya references use their own templates, FP32 CPU weights and published temperatures; Linnaeus uses merged BF16 weights.
+- Laya Vision has VQAv2 source-pool and A-OKVQA selection exposure. Backbone pretraining exposure is unverified.
+- Bub acceptance verifies local decision-tool calls, not autonomous planning quality.
+- Source model, dataset and image terms apply; this report does not assign a new weight license.
 
-Base revision: `2fc06364715b967f1860aea9cf38778875588b17`.
+## Reproducibility
 
-Selected weight SHA-256:
-`196be33a0282537bcd821e2115643b352d0ad2a0bbaf7b242a1b7fe5bd96cfdf`.
-
-The exported checkpoint records calibration, selection, and partition hashes in
-`linnaeus.json`. The [results](results/README.md) include loss, development accuracy,
-held-out quality, calibration bins, latency samples, and resource measurements.
-Their manifest identifies the selected weights and checksums each published table.
-No training Git revision was recorded. [Chart values](docs/figures/chart-data.csv)
-and a [figure manifest](docs/figures/manifest.json) accompany the comparisons.
-
-## License
-
-The code is licensed under [Apache-2.0](LICENSE). The decision weights are provided
-under [CC BY-NC-SA 4.0](https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B/blob/main/LICENSE)
-for non-commercial research. This grant covers the Dohnuts LoRA and decision-head
-contributions; the base model and source data retain their own terms.
-
-The Qwen3.5-0.8B base is Apache-2.0. [ScienceQA's dataset terms](https://github.com/lupantech/ScienceQA#warning-licenses)
-include non-commercial and share-alike restrictions; other sources have their
-own research-use terms.
-The checkpoint is not offered as a commercially cleared model. See the
-[data reference](docs/data-and-evaluation.md#release-assets-and-terms) and
-[attributions](NOTICE).
-
-```{toctree}
-:hidden:
-
-Benchmark comparisons <docs/figures/README>
-Evaluation results <results/README>
-```
+Base revision: `15852e8c16360a2fea060d615a32b45270f8a8fc`.
+Weight SHA-256: `0424555feea3126ee02d8d1b12636fad8cf491a5964a00a04b2fec67bcc0f602`.
+Recipe SHA-256: `d0017a70f1b6c789318700339cd454a74a05a3cac9f0687c1c322bd6eb031c62`.
+[Recorded source-file hashes](../source-sha256.json) identify the code snapshot used for the run. A training Git revision is not recorded.
