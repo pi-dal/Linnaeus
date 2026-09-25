@@ -558,23 +558,33 @@ def download_sources():
 
 
 def extract_archives():
-    with tarfile.open("data/raw/massive/massive-1.1.tar.gz") as archive:
+    # Each archive is deleted right after its own extraction: peak disk stays
+    # near the download total (~36 GB) instead of download + extracted (~58 GB).
+    massive = Path("data/raw/massive/massive-1.1.tar.gz")
+    with tarfile.open(massive) as archive:
         for lang in ["en-US", "zh-CN"]:
             Path(f"data/raw/massive/{lang}.jsonl").write_bytes(
                 archive.extractfile(f"1.1/data/{lang}.jsonl").read()
             )
-    with zipfile.ZipFile("data/raw/boolq/BoolQ.zip") as archive:
+    massive.unlink()
+    boolq = Path("data/raw/boolq/BoolQ.zip")
+    with zipfile.ZipFile(boolq) as archive:
         for split in ["train", "val"]:
             Path(f"data/raw/boolq/{split}.jsonl").write_bytes(archive.read(f"BoolQ/{split}.jsonl"))
+    boolq.unlink()
     for folder, filename in [("rico", "unique_uis.tar.gz"), ("aokvqa", "aokvqa_v1p0.tar.gz")]:
-        with tarfile.open(Path("data/raw") / folder / filename) as archive:
+        bundle = Path("data/raw") / folder / filename
+        with tarfile.open(bundle) as archive:
             archive.extractall(Path("data/raw") / folder, filter="data")
-    with zipfile.ZipFile("data/raw/clevr/CLEVR_v1.0.zip") as archive:
+        bundle.unlink()
+    clevr = Path("data/raw/clevr/CLEVR_v1.0.zip")
+    with zipfile.ZipFile(clevr) as archive:
         for name in archive.namelist():
             if name.startswith(
                 ("CLEVR_v1.0/questions/", "CLEVR_v1.0/images/train/", "CLEVR_v1.0/images/val/")
             ):
                 archive.extract(name, "data/raw/clevr")
+    clevr.unlink()
 
 
 def fingerprint(text):
@@ -1093,17 +1103,9 @@ def main():
     prepare_original(sources)
     filter_data(sources, base, args.model)
     prepare_mixture(base, args.output, args.model)
-    # Reclaim disk after a fully successful run: ~26 GB of one-shot archives,
-    # plus the intermediate split files. sources/images/ stays — final splits
-    # reference those files — and manifests stay for provenance.
-    for archive in [
-        "data/raw/clevr/CLEVR_v1.0.zip",
-        "data/raw/rico/unique_uis.tar.gz",
-        "data/raw/massive/massive-1.1.tar.gz",
-        "data/raw/boolq/BoolQ.zip",
-        "data/raw/aokvqa/aokvqa_v1p0.tar.gz",
-    ]:
-        Path(archive).unlink(missing_ok=True)
+    # Reclaim the intermediate split files after a fully successful run.
+    # sources/images/ stays — final splits reference those files — and
+    # manifests stay for provenance.
     shutil.rmtree(base)
     for intermediate in sources.glob("*.jsonl"):
         intermediate.unlink()
