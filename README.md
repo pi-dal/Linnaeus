@@ -37,9 +37,11 @@ probabilities in a single forward pass, with multiple questions sharing the same
 input. That is our take on System 1.
 
 The Python toolkit covers training, inference, evaluation, and agent integration.
-The 0.8B model runs locally on a consumer GPU.
+The model runs locally on a consumer GPU.
 
-[Model](https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B) · [Model card](MODEL_CARD.md) · [Documentation](docs/README.md) · [Benchmarks](docs/figures/README.md)
+[Linnaeus-0.1.0-2B](https://huggingface.co/pi-dal/Linnaeus-0.1.0-2B) · [Model card](MODEL_CARD.md) · [Documentation](docs/README.md) · [Benchmarks](docs/figures/README.md)
+
+Upstream reference: [Dohnuts-0.1.0-0.8B](https://huggingface.co/PsiACE/Dohnuts-0.1.0-0.8B).
 
 ## One message, several decisions
 
@@ -48,7 +50,7 @@ Route a support request and check whether it asks for a refund in the same call:
 ```python
 from linnaeus.predictor import Predictor
 
-model = Predictor.from_checkpoint("PsiACE/Dohnuts-0.1.0-0.8B")
+model = Predictor.from_checkpoint("pi-dal/Linnaeus-0.1.0-2B")
 result = model.predict(
     {"message": "I was charged twice. Please refund the duplicate."},
     {
