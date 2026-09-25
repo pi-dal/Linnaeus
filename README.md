@@ -211,6 +211,21 @@ Reference points above us: SemIf (Qwen3.5-4B) 80.95%, Jev 1.13.0 86.58%,
 GPT-5.6 Luna 97.40%. Among small local models we are at the top of the ~2B
 class and ahead of every sub-1B classifier.
 
+**Same backbone (Qwen3.5-2B + rank-8 LoRA + decision head), JevBench v1.4.2
+official** — note v1.4.2 uses expanded tier sizes (standard 96 / hard 220),
+so tier numbers are not on the same task set as our v1.2.2 run:
+
+| Model | easy | standard | judge | hard |
+| --- | ---: | ---: | ---: | ---: |
+| Open-Jev 9B (Zefan Cai) | 100% | 90.6% | 81.5% | 60.9% |
+| Open-Jev 2B (Zefan Cai) | 100% | 79.2% | 88.4% | 42.7% |
+| **Linnaeus-0.1.0-2B** (v1.2.2, 231 tasks) | 100% | 91.7% | — | 49.6% |
+
+Same-backbone peer without an official JevBench entry:
+[mohit67890/imajev-2b](https://huggingface.co/mohit67890/imajev-2b) — same
+pinned `Qwen3.5-2B@15852e8c` base and PEFT adapter form; reports only its own
+ImajevBench (279 questions), not comparable to the table above.
+
 ### Laya protocol suites (measured vs published)
 
 Upstream-published baselines on the same frozen inputs; Linnaeus measured on
