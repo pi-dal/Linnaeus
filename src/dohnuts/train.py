@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import random
+import re
 import time
 from collections import Counter, deque
 from dataclasses import asdict
@@ -26,6 +27,12 @@ from dohnuts.training_data import (
     load_records,
     prefetch_batches,
 )
+
+
+def model_id(base_model):
+    """Product name from the base size: Qwen3.5-2B -> Linnaeus-<version>-2B."""
+    size = re.search(r"(\d+(?:\.\d+)?B)", base_model)
+    return f"Linnaeus-{__version__}-{size.group(1) if size else 'custom'}"
 
 
 def file_hash(path):
@@ -453,7 +460,7 @@ def export_checkpoint(state, run, output):
         "project": "dohnuts",
         "distribution": "dohnuts",
         "version": __version__,
-        "model_id": f"Dohnuts-{__version__}-0.8B",
+        "model_id": model_id(config.get("base_model", "Qwen/Qwen3.5-0.8B")),
         "base_model": config.get("base_model", "Qwen/Qwen3.5-0.8B"),
         "base_path": str(base),
         "base_revision": (base / "revision.txt").read_text().strip(),
