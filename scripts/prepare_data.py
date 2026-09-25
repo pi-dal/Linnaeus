@@ -542,6 +542,12 @@ def download_file(item):
                 "2",
                 "--connect-timeout",
                 "30",
+                # Abort trickling stalls (<10 KiB/s for 30 s) so --retry can
+                # open a fresh connection instead of hanging for hours.
+                "--speed-limit",
+                "10240",
+                "--speed-time",
+                "30",
                 "--output",
                 str(partial),
                 download_url(item["url"]),

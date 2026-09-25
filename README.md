@@ -155,14 +155,55 @@ measurement — hardware differs): Dohnuts-0.1.0-0.8B text 1q 15.1 ms, text 50q
 112.5 ms, image 1q 24.4 ms; Laya multilingual 9.8 ms text 1q, no image path;
 Laya Vision 75.4 ms image 1q.
 
-### External suites (upstream-published)
+### JevBench v1.2.2 — 231 public tasks (measured)
 
-Reported by the upstream project, not re-measured on our checkpoint:
+Official runner, pinned datasets, rejections count as wrong:
 
-- JevBench v1.2.2, 231 public tasks: Dohnuts-0.1.0-0.8B **65.80%**, Laya
-  multilingual 47.62%, Laya Vision 48.05%
-- 51-language MASSIVE suite: Dohnuts-0.1.0-0.8B leads Laya multilingual; Laya
-  leads the 15-language XNLI suite
+| Model | Backbone | Overall | easy | standard | hard |
+| --- | --- | ---: | ---: | ---: | ---: |
+| **Linnaeus-0.1.0-2B** | Qwen3.5-2B | **73.16%** | 100% | 91.67% | 49.55% |
+| open-alternative-jev | Qwen3.5-4B | 74.03% | 100% | 83.33% | 56.76% |
+| system-one-open | Gemma 4 E2B LoRA | 73.16% | 100% | 93.06% | 48.65% |
+| system-one | Qwen3-8B | 71.86% | 100% | 88.89% | 48.65% |
+| Dohnuts-0.1.0-0.8B (upstream) | Qwen3.5-0.8B | 65.80% | — | — | — |
+| Nimble 9B | 9B | 67.53% | 100% | 93.06% | 36.94% |
+| jeff | GLiFormer 400M | 62.77% | 100% | 75.00% | 38.74% |
+| Laya multilingual | ModernBERT-large 421M | 58.44% | 95.8% | 69.44% | 35.14% |
+| openJev Verdict | ModernBERT-base 151M | 55.41% | 85.4% | 62.50% | 37.84% |
+| GLiNER2 | gliner2.5-base | 58.01% | 97.9% | 63.89% | 36.94% |
+| open-jev | DeBERTa-v3-large | 52.38% | 100% | 43.06% | 37.84% |
+
+Reference points above us: SemIf (Qwen3.5-4B) 80.95%, Jev 1.13.0 86.58%,
+GPT-5.6 Luna 97.40%. Among small local models we are at the top of the ~2B
+class and ahead of every sub-1B classifier.
+
+### Laya protocol suites (measured vs published)
+
+Upstream-published baselines on the same frozen inputs; Linnaeus measured on
+RTX 4090:
+
+| Suite | Linnaeus-2B | Dohnuts-0.8B | Laya multilingual |
+| --- | ---: | ---: | ---: |
+| app.email_spam | 88.0% | 78.8% | **99.3%** |
+| app.phishing | 87.5% | 75.8% | **99.3%** |
+| app.guardrails_jailbreak | 83.8% | **90.5%** | 75.5% |
+| app.moderation_toxicity | 64.0% | **68.2%** | 52.5% |
+| app.rag_relevance | 67.5% | 66.5% | 65.7% |
+| app.support_triage | 39.5% | 35.5% | **52.2%** |
+| app.model_routing_domain | **86.2%** | 76.7% | 12.3% |
+| jev.banking77_full | **73.2%** | 70.5% | 42.5% |
+| jev.emotion | 77.5% | **78.2%** | 53.0% |
+| colab/typed_decisions | **73.7%** | 72.3% | 34.2% |
+
+### Multilingual suites (measured vs published)
+
+| Suite | Linnaeus-2B | Dohnuts-0.8B | Laya multilingual |
+| --- | ---: | ---: | ---: |
+| MASSIVE intent (15 langs) | **77.4%** | 73.3% | 46.6% |
+| MASSIVE scenario | **63.1%** | 52.6% | 44.7% |
+| XNLI (15 langs) | **76.0%** | 70.9% | 73.8% |
+
+Where upstream lost XNLI to Laya, Linnaeus-2B takes it back.
 
 ## Provenance
 
