@@ -13,6 +13,7 @@ import io
 import json
 import mailbox
 import re
+import shutil
 import subprocess
 import tarfile
 import zipfile
@@ -1092,6 +1093,20 @@ def main():
     prepare_original(sources)
     filter_data(sources, base, args.model)
     prepare_mixture(base, args.output, args.model)
+    # Reclaim disk after a fully successful run: ~26 GB of one-shot archives,
+    # plus the intermediate split files. sources/images/ stays — final splits
+    # reference those files — and manifests stay for provenance.
+    for archive in [
+        "data/raw/clevr/CLEVR_v1.0.zip",
+        "data/raw/rico/unique_uis.tar.gz",
+        "data/raw/massive/massive-1.1.tar.gz",
+        "data/raw/boolq/BoolQ.zip",
+        "data/raw/aokvqa/aokvqa_v1p0.tar.gz",
+    ]:
+        Path(archive).unlink(missing_ok=True)
+    shutil.rmtree(base)
+    for intermediate in sources.glob("*.jsonl"):
+        intermediate.unlink()
 
 
 if __name__ == "__main__":
