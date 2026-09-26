@@ -107,3 +107,45 @@ including state, instructions, candidates, and image tokens. Inputs that exceed
 the budget are rejected; shorten the state or candidate descriptions and retry.
 Image features and the shared input prefix are reused where possible. More
 questions still require more computation.
+
+## Apple Silicon (MLX / on-device)
+
+The published MLX builds run the model natively on macOS and iOS via
+[mlx-lm](https://github.com/ml-explore/mlx-lm) /
+[mlx-swift-lm](https://github.com/ml-explore/mlx-swift-lm)
+(text decisions only — the vision tower is not ported):
+
+| Artifact | Size | JevBench v1.2.2 (231 tasks) | Use |
+| --- | --- | --- | --- |
+| `pi-dal/Linnaeus-0.1.0-2B-merged` | 4.3 GB | 71.0% (torch MPS) | Mac dev, conversion source |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-8bit` | 1.9 GB | 70.56% | Mac / iPhone, quality pick |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-4bit` | 1.0 GB | 67.53% | iPhone, size pick |
+
+CUDA reference on the same tasks is 73.16%; the residual gap is the fla
+chunked delta-rule kernel vs. reference implementations, concentrated on
+hard-tier borderline tasks (easy/standard are identical). Upstream's
+published result on the same benchmark is 65.80%.
+
+```python
+from linnaeus.mlx_predictor import MlxPredictor
+
+predictor = MlxPredictor("runs/2b/exports/linnaeus-2b-8bit")
+result = predictor.predict(state, questions)  # same contract as Predictor
+```
+
+To reproduce the exports:
+
+```bash
+python scripts/export_merged_hf.py --base <Qwen3.5-2B snapshot> \
+    --adapter runs/2b/checkpoint --out runs/2b/exports/merged-hf
+uvx --from mlx-lm python -m mlx_lm convert \
+    --hf-path runs/2b/exports/merged-hf \
+    --mlx-path runs/2b/exports/linnaeus-2b-8bit -q --q-bits 8
+```
+
+The merged checkpoint embeds the scalar decision head as an extra
+`embed_tokens`/`lm_head` row (`score_row_id`), so a stock LM forward is all a
+runtime needs: read `logits[marker_pos, score_row_id]` at each
+`<|fim_suffix|>` marker, apply the per-type temperature, softmax across a
+question's candidates. `linnaeus-runtime.json` carries that contract to
+non-Python runtimes (e.g. a ~100-line Swift shim for iOS).
