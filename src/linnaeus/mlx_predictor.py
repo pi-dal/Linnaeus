@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
-from typing import Mapping
+from collections.abc import Mapping
 
 import mlx.core as mx  # ty: ignore[unresolved-import] (macOS-only dependency)
 import numpy as np
@@ -170,7 +170,10 @@ class MlxPredictor:
         except Exception as e:
             import warnings
 
-            warnings.warn(f"shared-prefix path failed ({e}); falling back to per-question forward")
+            warnings.warn(
+                f"shared-prefix path failed ({e}); falling back to per-question forward",
+                stacklevel=2,
+            )
             scored = {
                 qid: (
                     render_question(state_text, q, has_image=image is not None)[1],
