@@ -8,6 +8,6 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: end-of-file-fixer
-        exclude: ^(data/manifests/|docs/figures/|results/)
+        exclude: ^(data/manifests/|docs/figures/|results/|runs/)
       - id: trailing-whitespace
-        exclude: ^(data/manifests/|docs/figures/|results/)
+        exclude: ^(data/manifests/|docs/figures/|results/|runs/)
