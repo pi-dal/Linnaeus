@@ -81,30 +81,36 @@ const hortus = [
 <template>
   <main>
     <!-- ═══ Hero ═══ -->
-    <section class="mx-auto max-w-5xl px-6 pt-20 pb-16">
-      <p class="meta-label mb-6">Systema Naturae · ed. MMXXVI</p>
-      <h1 class="font-serif text-moss text-[clamp(3rem,9vw,6.5rem)] leading-[0.95] tracking-tight">LINNAEUS</h1>
-      <p class="latin text-2xl sm:text-3xl mt-3">Linnaeus decisio</p>
-      <div class="mt-8 max-w-xl">
-        <div class="h-px w-24 bg-leaf mb-6" />
-        <p class="text-lg leading-relaxed text-ink/90">
-          A 2-billion-parameter model that <em class="font-serif not-italic text-moss">decides</em>
-          rather than generates. Give it a state and candidate answers —
-          it returns calibrated probabilities over them. No prose, no drift,
-          small enough for a phone.
-        </p>
+    <section class="mx-auto max-w-5xl px-6 pt-20 pb-16 grid lg:grid-cols-[1.15fr_1fr] gap-14 items-start">
+      <div>
+        <p class="meta-label mb-6 hero-in">Systema Naturae · ed. MMXXVI</p>
+        <h1 class="font-serif text-moss text-[clamp(3rem,9vw,6.5rem)] leading-[0.95] tracking-tight hero-in-2">LINNAEUS</h1>
+        <p class="latin text-2xl sm:text-3xl mt-3 hero-in-3">Linnaeus decisio</p>
+        <div class="mt-8 max-w-xl">
+          <div class="h-px w-24 bg-leaf mb-6 stem-draw" />
+          <p class="text-lg leading-relaxed text-ink/90 hero-in-4">
+            A 2-billion-parameter model that <em class="font-serif not-italic text-moss">decides</em>
+            rather than generates. Give it a state and candidate answers —
+            it returns calibrated probabilities over them. No prose, no drift,
+            small enough for a phone.
+          </p>
+        </div>
+        <div class="mt-10 flex gap-4 text-sm hero-in-4">
+          <a href="https://github.com/pi-dal/Linnaeus"
+             class="px-4 py-2 bg-moss text-paper hover:bg-leaf transition-colors">Repository</a>
+          <NuxtLink to="/docs"
+             class="px-4 py-2 hairline text-moss hover:bg-paper-deep transition-colors">Read the docs</NuxtLink>
+        </div>
       </div>
-      <div class="mt-10 flex gap-4 text-sm">
-        <a href="https://github.com/pi-dal/Linnaeus"
-           class="px-4 py-2 bg-moss text-paper hover:bg-leaf transition-colors">Repository</a>
-        <NuxtLink to="/docs"
-           class="px-4 py-2 hairline text-moss hover:bg-paper-deep transition-colors">Read the docs</NuxtLink>
+      <div class="portrait-in lg:mt-4">
+        <MagneticPortrait />
+        <p class="mt-3 text-xs text-fern italic font-serif">move the cursor — the specimen parts, then returns</p>
       </div>
     </section>
 
     <!-- ═══ Plates ═══ -->
     <section class="border-y border-vein bg-paper-deep/60">
-      <div class="mx-auto max-w-5xl px-6 py-12 grid grid-cols-2 lg:grid-cols-4 gap-px bg-vein/40">
+      <div class="mx-auto max-w-5xl px-6 py-12 grid grid-cols-2 lg:grid-cols-4 gap-px bg-vein/40" data-reveal>
         <div v-for="p in plates" :key="p.n" class="plate px-6 py-6">
           <p class="meta-label mb-3">Tab. {{ p.n }}</p>
           <p class="font-mono text-3xl text-moss font-medium">{{ p.value }}</p>
@@ -121,7 +127,7 @@ const hortus = [
       <div class="h-px w-16 bg-leaf mb-10" />
 
       <div class="grid lg:grid-cols-2 gap-10">
-        <div>
+        <div data-reveal>
           <p class="meta-label mb-3">Held-out suite · 26 groups</p>
           <table class="w-full text-sm hairline">
             <thead>
@@ -147,7 +153,7 @@ const hortus = [
         </div>
 
         <div class="space-y-10">
-          <div>
+          <div data-reveal>
             <p class="meta-label mb-3">JevBench v1.2.2 · 231 public tasks</p>
             <table class="w-full text-sm hairline">
               <tbody>
@@ -164,7 +170,7 @@ const hortus = [
             −18 net vs the 4B classifiers, +24 to +48 vs every sub-1B model.</p>
           </div>
 
-          <div>
+          <div data-reveal>
             <p class="meta-label mb-3">The on-device ladder · same 231 tasks</p>
             <table class="w-full text-sm hairline">
               <tbody>
@@ -188,7 +194,7 @@ const hortus = [
         <p class="meta-label mb-2">Classis</p>
         <h2 class="font-serif text-3xl sm:text-4xl text-moss mb-2">The mechanism</h2>
         <div class="h-px w-16 bg-leaf mb-10" />
-        <div class="grid md:grid-cols-2 gap-12 items-start">
+        <div class="grid md:grid-cols-2 gap-12 items-start" data-reveal>
           <div class="space-y-5 text-ink/90 leading-relaxed">
             <p>
               Each request carries a <strong class="text-moss font-medium">state</strong> and
@@ -220,7 +226,7 @@ const hortus = [
         <p class="meta-label mb-2">Ratio</p>
         <h2 class="font-serif text-3xl sm:text-4xl text-moss mb-2">Why it is built this way</h2>
         <div class="h-px w-16 bg-leaf mb-10" />
-        <div class="grid sm:grid-cols-2 gap-x-12 gap-y-10">
+        <div class="grid sm:grid-cols-2 gap-x-12 gap-y-10" data-reveal>
           <div v-for="n in notes" :key="n.k" class="flex gap-5">
             <span class="font-serif italic text-2xl text-fern shrink-0 w-8">{{ n.k }}.</span>
             <div>
@@ -237,7 +243,7 @@ const hortus = [
       <p class="meta-label mb-2">Genus</p>
       <h2 class="font-serif text-3xl sm:text-4xl text-moss mb-2">The specimens</h2>
       <div class="h-px w-16 bg-leaf mb-10" />
-      <div class="hairline">
+      <div class="hairline" data-reveal>
         <div v-for="(s, i) in species" :key="i"
              class="grid sm:grid-cols-[1fr_6rem_1.6fr] gap-2 sm:gap-6 px-6 py-4 items-baseline border-b border-vein last:border-b-0 hover:bg-paper-deep/70 transition-colors">
           <a :href="s.href" class="font-serif italic text-lg text-moss hover:text-leaf transition-colors">
@@ -256,7 +262,7 @@ const hortus = [
         <p class="meta-label mb-2">Hortus</p>
         <h2 class="font-serif text-3xl sm:text-4xl text-moss mb-2">The garden it grew in</h2>
         <div class="h-px w-16 bg-leaf mb-10" />
-        <div class="hairline divide-y divide-vein">
+        <div class="hairline divide-y divide-vein" data-reveal>
           <a v-for="h in hortus" :key="h.name" :href="h.href"
              class="grid sm:grid-cols-[14rem_1fr] gap-1 sm:gap-8 px-6 py-4 items-baseline hover:bg-paper-deep/70 transition-colors group">
             <span class="font-serif text-moss group-hover:text-leaf transition-colors">{{ h.name }}</span>

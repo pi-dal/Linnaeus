@@ -1,5 +1,10 @@
+<script setup lang="ts">
+useReveal()
+</script>
+
 <template>
   <div class="min-h-screen bg-paper text-ink font-sans">
+    <GrainOverlay />
     <header class="border-b border-vein">
       <div class="mx-auto max-w-5xl px-6 py-4 flex items-baseline justify-between">
         <NuxtLink to="/" class="flex items-baseline gap-3 group">

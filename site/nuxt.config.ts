@@ -9,13 +9,14 @@ export default defineNuxtConfig({
     build: { markdown: { toc: { depth: 3 } } },
   },
   app: {
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
     head: {
       title: 'Linnaeus — a taxonomist for decisions',
       meta: [
         { name: 'description', content: 'A 2B decision model that classifies states into distributions — no generation, calibrated, on-device.' },
       ],
       htmlAttrs: { lang: 'en' },
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: (process.env.NUXT_APP_BASE_URL || '/') + 'favicon.svg' }],
     },
   },
   css: ['~/assets/css/main.css'],

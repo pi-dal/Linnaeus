@@ -44,9 +44,16 @@ no dark mode v1.
 
 ## Signature interaction
 
-Minimal motion. Hover on specimen cards lifts the label strip opacity.
-Numbers count nowhere — static measured values, printed like plates.
-The one flourish: a thin growing stem line that draws on hero load.
+**Magnetic halftone portrait** — Linnaeus (Roslin, 1775, public domain)
+rendered as a dot matrix whose radius tracks image luminance; the cursor
+repels particles and a spring returns them. The taxonomist himself becomes
+the specimen: he is pulled apart by attention and reassembles. Displaced
+dots bloom toward leaf green.
+
+Supporting motion: fibrous paper grain overlay (feTurbulence, multiply
+blend), staggered hero rise, scroll reveals at 12% threshold, stem-rule
+draw-in. All gated on prefers-reduced-motion (portrait falls back to a
+static halftone; reveals instant).
 
 ## Surface anatomy (landing)
 

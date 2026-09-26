@@ -6,3 +6,36 @@
 html { background: #F7F5EE; color: #1A2B1E; }
 body { -webkit-font-smoothing: antialiased; }
 ::selection { background: #4A7C59; color: #F7F5EE; }
+
+/* ————— Linnaean motion system ————— */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-reveal].revealed { opacity: 1; transform: none; }
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes stem-draw {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); }
+}
+@keyframes portrait-settle {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.hero-in   { animation: hero-rise 0.9s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-in-2 { animation: hero-rise 0.9s 0.12s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-in-3 { animation: hero-rise 0.9s 0.24s cubic-bezier(0.22,1,0.36,1) both; }
+.hero-in-4 { animation: hero-rise 0.9s 0.36s cubic-bezier(0.22,1,0.36,1) both; }
+.stem-draw { animation: stem-draw 1.2s 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.portrait-in { animation: portrait-settle 1.1s 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { transition: none; opacity: 1; transform: none; }
+  .hero-in, .hero-in-2, .hero-in-3, .hero-in-4, .stem-draw, .portrait-in { animation: none; }
+}
