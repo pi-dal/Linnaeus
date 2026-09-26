@@ -32,7 +32,12 @@ from safetensors.torch import load_file, save_file
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", type=Path, required=True, help="Base HF snapshot dir")
-    ap.add_argument("--adapter", type=Path, required=True, help="Checkpoint dir (linnaeus.json + adapter.safetensors)")
+    ap.add_argument(
+        "--adapter",
+        type=Path,
+        required=True,
+        help="Checkpoint dir (linnaeus.json + adapter.safetensors)",
+    )
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 

@@ -75,6 +75,7 @@ Three warmups and 20 synchronized repetitions; network and queueing excluded.
 
 ```python
 from linnaeus.predictor import Predictor
+
 model = Predictor.from_checkpoint("runs/2b/checkpoint")
 ```
 
