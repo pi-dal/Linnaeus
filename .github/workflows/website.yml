@@ -31,7 +31,7 @@ jobs:
       - uses: jdx/mise-action@v3
       - name: Build site (Pages serves under /<repo>/)
         env:
-          NUXT_APP_BASE_URL: /Linnaeus/
+          NUXT_APP_BASE_URL: /
         run: mise run site
       - uses: actions/upload-pages-artifact@v4
         with:

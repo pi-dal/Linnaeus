@@ -20,7 +20,7 @@ import math
 from pathlib import Path
 from typing import Mapping
 
-import mlx.core as mx
+import mlx.core as mx  # ty: ignore[unresolved-import] (macOS-only dependency)
 import numpy as np
 
 from linnaeus.predictor import render, render_question
@@ -31,8 +31,9 @@ IMAGE_PREFIX = "<|vision_start|><|image_pad|><|vision_end|>\n"
 class MlxPredictor:
     """predict() parity with linnaeus.predictor.Predictor, MLX backend."""
 
-    def __init__(self, model_path: str | Path, runtime: str | Path | None = None,
-                 vision: bool | None = None):
+    def __init__(
+        self, model_path: str | Path, runtime: str | Path | None = None, vision: bool | None = None
+    ):
         from transformers import AutoTokenizer
 
         self.model_path = Path(model_path)
@@ -41,20 +42,25 @@ class MlxPredictor:
         self.score_row = contract["score_row_id"]
         self.temperatures = contract["temperatures"]
         self.max_length = contract.get("max_length", 2048)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        tok = AutoTokenizer.from_pretrained(self.model_path)
+        assert tok is not None
+        self.tokenizer = tok
         self.marker_id = self.tokenizer.convert_tokens_to_ids(contract["marker"])
 
         # A VLM build is detected by the presence of vision weights or the
         # `vision` flag; it uses mlx_vlm's processor for pixel_values.
         self.vision = vision
         if self.vision is None:
-            self.vision = any(self.model_path.glob("**/model.visual*")) or "vlm" in self.model_path.name.lower()
+            self.vision = (
+                any(self.model_path.glob("**/model.visual*"))
+                or "vlm" in self.model_path.name.lower()
+            )
         if self.vision:
-            from mlx_vlm import load as vlm_load
+            from mlx_vlm import load as vlm_load  # ty: ignore[unresolved-import]
 
             self.model, self.processor = vlm_load(self.model_path)
         else:
-            from mlx_lm import load as lm_load
+            from mlx_lm import load as lm_load  # ty: ignore[unresolved-import]
 
             self.model, _ = lm_load(self.model_path)
             self.processor = None
@@ -70,6 +76,7 @@ class MlxPredictor:
         if image is None:
             out = self.model(mx.array(list(ids))[None], cache=cache)
             return out.logits if hasattr(out, "logits") else out
+        assert self.processor is not None
         inp = self.processor(text=[ids], images=[image])  # ids here is text
         tok_ids = inp["input_ids"]
         extra = {k: v for k, v in inp.items() if k not in ("input_ids", "pixel_values")}
@@ -90,6 +97,7 @@ class MlxPredictor:
             if not self.vision:
                 raise ValueError("This MLX build has no vision tower; use a -vlm- export")
             formatted = IMAGE_PREFIX + text.removeprefix(IMAGE_PREFIX)
+            assert self.processor is not None
             inp = self.processor(text=[formatted], images=[image])
             flat = inp["input_ids"]
             flat = flat[0] if getattr(flat, "ndim", 1) > 1 else flat
@@ -110,28 +118,21 @@ class MlxPredictor:
         are unaffected. Measured: 1.4x faster on 8 text questions, 4.5x on
         6 image questions (vision encoding runs once).
         """
-        from mlx_lm.models.cache import make_prompt_cache
+        from mlx_lm.models.cache import make_prompt_cache  # ty: ignore[unresolved-import]
 
         prefix_text = f"State: {state_text}\n"
         if image is not None:
+            # processor expands image tokens at inference; the token boundary
+            # check below operates on raw text ids, which is consistent
             prefix_text = IMAGE_PREFIX + prefix_text
-        prefix_ids = (
-            self.tokenizer(prefix_text)["input_ids"]
-            if image is None
-            else None
-        )
-        if image is not None:
-            # processor expands image tokens; keep text prefix for them
-            pids = self.tokenizer(prefix_text)["input_ids"]
-        else:
-            pids = prefix_ids
+        pids = self.tokenizer(prefix_text)["input_ids"]
 
         answers = {}
         # VLM wrapper lacks make_cache; the language model owns the hybrid
         # (ArraysCache + KVCache) cache list.
         lm = getattr(self.model, "language_model", self.model)
         cache = make_prompt_cache(lm)
-        self._forward(prefix_ids if image is None else prefix_text, cache=cache, image=image)
+        self._forward(pids if image is None else prefix_text, cache=cache, image=image)
         snapshot = [c.state for c in cache]
         prefix_len = len(pids)
 
@@ -168,10 +169,17 @@ class MlxPredictor:
             scored = self._predict_cached(state_text, questions, image)
         except Exception as e:
             import warnings
+
             warnings.warn(f"shared-prefix path failed ({e}); falling back to per-question forward")
-            scored = {qid: (render_question(state_text, q, has_image=image is not None)[1],
-                            self._score_text(render_question(state_text, q, has_image=image is not None)[0], image))
-                      for qid, q in questions.items()}
+            scored = {
+                qid: (
+                    render_question(state_text, q, has_image=image is not None)[1],
+                    self._score_text(
+                        render_question(state_text, q, has_image=image is not None)[0], image
+                    ),
+                )
+                for qid, q in questions.items()
+            }
         for qid, question in questions.items():
             labels, scores = scored[qid]
             temperature = self.temperatures[question["type"]]
