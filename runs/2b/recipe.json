@@ -1,0 +1,47 @@
+{
+  "recipe": {
+    "model": ".cache/models/Qwen3.5-2B",
+    "base_model_id": "Qwen/Qwen3.5-2B",
+    "data": "data/processed/v1",
+    "seed": 42,
+    "lora_rank": 8,
+    "batch_size": 8,
+    "accumulation": 4,
+    "steps": 3600,
+    "backbone_lr": 0.0001,
+    "head_lr": 0.0005,
+    "train_cap": 6000,
+    "dev_cap": 256,
+    "image_pixels": 262144,
+    "max_length": 2048,
+    "cpu_threads": 16,
+    "workers": 16,
+    "eval_batch_size": 64,
+    "log_every": 10,
+    "eval_every": 400,
+    "save_every": 100,
+    "backend": {
+      "linear_patch": true,
+      "triton_convolution": true,
+      "experimental_rocm_sdpa": true,
+      "fused_norm_and_swiglu": true,
+      "shared_prefix": true,
+      "frozen_vision_cache_MiB": 128
+    }
+  },
+  "rlcd": {
+    "samples": 4,
+    "sigma": 0.3,
+    "log_weight": 1.0,
+    "spherical_weight": 0.75,
+    "ordinal_weight": 1.0,
+    "ce_weight": 1.0,
+    "log_floor": -9.21
+  },
+  "source_hashes": {
+    "train": "4e8b258c9e5d5a98810868df5d572a824a9d1d6c5aa557ab5123cb7aab5de373",
+    "dev": "b736750efff3e30ae8a7772c482fa248899b8a1cf69ace104310e2540671d552",
+    "calibration": "815cfe0855dd5494f9def19ddb2a6b12e4116c3ae24d2775db620021dd07fb28",
+    "test": "fdac64d536d67c011d55d00352f0be71fa3bdfb7811c0be0e05a5d66cec98095"
+  }
+}

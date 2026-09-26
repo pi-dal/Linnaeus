@@ -1,0 +1,18 @@
+{
+  "upstream_revision": "e105a48f8cdb7f3babb3594424f73e5d7bdc97b9",
+  "dataset_sha256": {
+    "original": "5c2414edb3006b8bfcb70fda433f0f9ca015759433849f8d3104328a1f7c4180",
+    "easy": "231df3c2c8e88a1a8c137ebe85de96ba70fabd330849098ac7b3c52c70b7172b",
+    "hard": "89e9e6becb33ed88c1de7d42dcc87531b2fb64cfaef4e1986faf7c37b3f80ebb"
+  },
+  "checkpoint_sha256": "0424555feea3126ee02d8d1b12636fad8cf491a5964a00a04b2fec67bcc0f602",
+  "temperatures": {
+    "choice": 1.6947466135025024,
+    "noul": 2.9416117668151855,
+    "score": 4.854694843292236
+  },
+  "mapping": "Unchanged state and build_question(task); noul P(true) maps to yes.",
+  "protocol": "Serial, no retries, one native distribution per decision; official Runner.",
+  "input_limit": 4096,
+  "cost_basis": "local_gpu_no_provider_tariff"
+}

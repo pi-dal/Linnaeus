@@ -19,7 +19,7 @@ __pycache__/
 /data/raw/
 /data/processed/
 /data/benchmarks/
-/runs/
+/runs/*
 # recorded run: metrics + benchmark evidence for Linnaeus-0.1.0-2B
 !/runs/2b/
 /runs/2b/checkpoint/
