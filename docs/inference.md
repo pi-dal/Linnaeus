@@ -2,7 +2,7 @@
 
 The Linnaeus runtime uses Python 3.12 and PyTorch 2.9.1 with CUDA 12.8 on an
 NVIDIA GPU (Ampere or newer for BF16). Upstream measured ROCm 6.4 on an
-AMD Radeon RX 7900 XTX. Install [mise](https://mise.jdx.dev/) (it provisions
+AMD Radeon RX 7900 XTX; this release was trained on a single RTX 4090 24GB (OpenBayes). Install [mise](https://mise.jdx.dev/) (it provisions
 Python 3.12 and uv from `mise.toml`), then install from source:
 
 ```bash
@@ -21,7 +21,7 @@ the lock.
 ## Load a checkpoint
 
 Load the model by its Hugging Face repository ID. The loader downloads the
-decision weights and the exact Qwen3.5-0.8B revision recorded in the checkpoint.
+decision weights and the exact Qwen3.5-2B revision recorded in the checkpoint.
 Downloads use the Hugging Face cache and are reused by later calls. Both
 repositories are public; downloading them does not require a Hugging Face login.
 

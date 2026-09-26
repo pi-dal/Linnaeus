@@ -150,6 +150,8 @@ const hortus = [
           <p class="mt-3 text-xs text-fern">20 wins, 6 ties, 0 losses across all 26 groups vs upstream 0.8B —
           shown: the largest gains plus the one cell where we trail. † screenqa_choice is a
           task-format artifact upstream shares (both at ~22%), not a regression.</p>
+          <p class="mt-2 text-xs text-fern">Recorded run: seed 42, selected at update 2,800 of 3,600;
+          205.7 min on one RTX 4090 (23.9 GiB peak), RLCD + cross-entropy, rank-8 LoRA.</p>
         </div>
 
         <div class="space-y-10">

@@ -1,7 +1,8 @@
 # Latency and resource measurement
 
 The benchmark runs the actual exported, merged checkpoint and the pinned Laya multilingual
-and Laya Vision checkpoints on one RX 7900 XTX. Each engine receives
+and Laya Vision checkpoints on one RX 7900 XTX (upstream) or the recorded
+RTX 4090 run (Linnaeus). Each engine receives
 the same state and questions. Tokenizers, model sizes, and internal templates
 differ; this is an API workload comparison.
 
@@ -86,7 +87,7 @@ identity. Calibration comparisons use the shared 49 suites because the upstream
 result omits BANKING77. Typed-decisions soft accuracy is the inner product of
 predicted and teacher distributions, following this benchmark's definition.
 
-Local latency uses the RX 7900 XTX, not the chart's T4. Mixed-language measurements
+Local latency used the RX 7900 XTX upstream; Linnaeus measurements ran on the RTX 4090. Mixed-language measurements
 use the upstream English/Hindi request stream and one resident Linnaeus model; no
 checkpoint routing or swapping is added. Local inference has a compute cost even
 when no API fee is paid.

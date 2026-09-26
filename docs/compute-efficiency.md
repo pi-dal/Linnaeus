@@ -59,6 +59,11 @@ weights or tune temperatures.
 
 ## Hardware bounds
 
+The upstream analysis uses the RX 7900 XTX; the recorded Linnaeus-0.1.0-2B
+run trained 3,600 updates in 205.7 minutes on a single RTX 4090 24GB
+(OpenBayes), peaking at 23.9 GiB VRAM with fused kernels and shared-prefix
+batching. The bounds below remain upstream's reference analysis.
+
 The RX 7900 XTX has 96 compute units, a reference boost frequency of 2.5 GHz,
 24 GB GDDR6 and 960 GB/s external memory bandwidth. AMD documents 512 BF16
 matrix FLOPs per clock per compute unit. The dense BF16 matrix ceiling is

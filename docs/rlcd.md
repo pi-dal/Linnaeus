@@ -1,9 +1,10 @@
 # RLCD implementation
 
-The Linnaeus training recipe keeps the Qwen3.5-0.8B vision encoder frozen and trains language LoRA adapters
+The Linnaeus training recipe keeps the Qwen3.5-2B vision encoder frozen and trains language LoRA adapters
 (rank 8, alpha 16) plus a shared candidate scorer.
-The pinned base is `Qwen/Qwen3.5-0.8B` revision
-`2fc06364715b967f1860aea9cf38778875588b17`.
+The pinned base is `Qwen/Qwen3.5-2B` revision
+`15852e8c16360a2fea060d615a32b45270f8a8fc`. (Upstream pinned
+`Qwen/Qwen3.5-0.8B`; the only deliberate recipe change in this fork is the backbone.)
 
 The numerical reference is [Laya Vision `vlm_loss`](https://github.com/r33drichards/laya-vision/blob/86ccec115ef3d72d1851168fc9b7194e8dbed35a/laya/vlm_train.py)
 and [Laya's typed-decisions training notebook](https://github.com/NandhaKishorM/laya/blob/d113dca2512fb3eaca313534bc54c7162d87c1d4/notebooks/laya_finetune_typed_decisions_2xT4_kaggle.ipynb).

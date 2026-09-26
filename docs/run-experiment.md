@@ -1,7 +1,7 @@
 # Train and evaluate Linnaeus
 
 Use Python 3.12 and a working PyTorch installation on a CUDA GPU
-(Linnaeus targets NVIDIA; upstream recorded ROCm on an RX 7900 XTX).
+(Linnaeus targets NVIDIA; the recorded run used an RTX 4090 24GB on OpenBayes — upstream recorded ROCm on an RX 7900 XTX).
 The recorded upstream training environment is preserved in
 `data/manifests/environment-freeze.txt`. Follow the [setup](inference.md)
 first; the package sources and lock file select the `+cu128` wheels.
@@ -54,7 +54,7 @@ Linnaeus adds backbone and execution controls:
 
 | Flag | Default | Effect |
 | --- | --- | --- |
-| `--base-repo` / `--base-revision` | `Qwen/Qwen3.5-0.8B` + pinned commit | Backbone downloaded when `--model` lacks `revision.txt`; recorded as `base_model_id` |
+| `--base-repo` / `--base-revision` | `Qwen/Qwen3.5-2B` + pinned commit `15852e8c` | Backbone downloaded when `--model` lacks `revision.txt`; recorded as `base_model_id` |
 | `--lora-rank` | 8 | LoRA rank (alpha = 2×rank); changes trainable shapes — use a fresh `--output` |
 | `--workers` | 2 | DataLoader workers for train and evaluation collation |
 | `--eval-batch-size` | 16 | Questions per evaluation forward; larger is faster on idle VRAM |
@@ -106,5 +106,5 @@ Render comparison figures from the saved results using the
 [plotting instructions](local-benchmarks.md#model-card-figures).
 
 The compact checkpoint requires its pinned base model, which defaults to
-`.cache/models/Qwen3.5-0.8B`. Raw data, cached base weights, and generated results
+`.cache/models/Qwen3.5-2B`. Raw data, cached base weights, and generated results
 are local artifacts rather than package contents.
