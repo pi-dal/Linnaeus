@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import json
 import math
-from pathlib import Path
 from collections.abc import Mapping
+from pathlib import Path
 
 import mlx.core as mx  # ty: ignore[unresolved-import] (macOS-only dependency)
 import numpy as np
