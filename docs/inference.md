@@ -112,14 +112,23 @@ questions still require more computation.
 
 The published MLX builds run the model natively on macOS and iOS via
 [mlx-lm](https://github.com/ml-explore/mlx-lm) /
-[mlx-swift-lm](https://github.com/ml-explore/mlx-swift-lm)
-(text decisions only — the vision tower is not ported):
+[mlx-swift-lm](https://github.com/ml-explore/mlx-swift-lm).
+The `-MLX-*` builds are text-only; the `-MLX-VLM-*` builds (converted via
+mlx-vlm) also keep the vision tower for `state['image']` decisions:
 
 | Artifact | Size | JevBench v1.2.2 (231 tasks) | Use |
 | --- | --- | --- | --- |
 | `pi-dal/Linnaeus-0.1.0-2B-merged` | 4.3 GB | 71.0% (torch MPS) | Mac dev, conversion source |
-| `pi-dal/Linnaeus-0.1.0-2B-MLX-8bit` | 1.9 GB | 70.56% | Mac / iPhone, quality pick |
-| `pi-dal/Linnaeus-0.1.0-2B-MLX-4bit` | 1.0 GB | 67.53% | iPhone, size pick |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-8bit` | 1.9 GB | 70.56% | Mac / iPhone, text quality pick |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-4bit` | 1.0 GB | 67.53% | iPhone, text size pick |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-VLM-8bit` | 2.5 GB | 70.56% text + **images** | Mac / iPhone multimodal |
+| `pi-dal/Linnaeus-0.1.0-2B-MLX-VLM-4bit` | 1.6 GB | ~67% text + **images** | iPhone multimodal, size pick |
+
+The VLM builds are converted with `mlx-vlm convert` (vision tower stays
+bf16; only the language stack is quantized). A post-conversion step must
+copy `quantization` into `config.json` — mlx-vlm 0.7.1 omits it and the
+model then fails to load. Pass a decoded PIL image via `state['image']`
+to the same `MlxPredictor.predict()` contract.
 
 CUDA reference on the same tasks is 73.16%; the residual gap is the fla
 chunked delta-rule kernel vs. reference implementations, concentrated on
@@ -138,9 +147,13 @@ To reproduce the exports:
 ```bash
 python scripts/export_merged_hf.py --base <Qwen3.5-2B snapshot> \
     --adapter runs/2b/checkpoint --out runs/2b/exports/merged-hf
+# text-only build
 uvx --from mlx-lm python -m mlx_lm convert \
     --hf-path runs/2b/exports/merged-hf \
     --mlx-path runs/2b/exports/linnaeus-2b-8bit -q --q-bits 8
+# multimodal build (keeps vision tower)
+python -m mlx_vlm convert --hf-path runs/2b/exports/merged-hf \
+    --mlx-path runs/2b/exports/linnaeus-2b-vlm-8bit --quantize --q-bits 8
 ```
 
 The merged checkpoint embeds the scalar decision head as an extra
