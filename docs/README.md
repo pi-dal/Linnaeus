@@ -25,5 +25,3 @@ The [behavior and regression tests](design.md#behavior-and-regression-tests)
 cover the prediction interface and known failure cases.
 
 For contributors, see [Development](development.md) and [Build the website](website.md).
-
-
