@@ -126,9 +126,12 @@ mlx-vlm) also keep the vision tower for `state['image']` decisions:
 
 The VLM builds are converted with `mlx-vlm convert` (vision tower stays
 bf16; only the language stack is quantized). A post-conversion step must
-copy `quantization` into `config.json` — mlx-vlm 0.7.1 omits it and the
-model then fails to load. Pass a decoded PIL image via `state['image']`
-to the same `MlxPredictor.predict()` contract.
+write **both** `quantization` and `quantization_config` into `config.json`
+({"group_size": 64, "bits": N, "mode": "affine"}) — mlx-vlm 0.7.1 omits
+them, `load_weights` then rejects the quantized tensors, and Hugging Face
+misclassifies the repo as a finetune instead of a quantization. Pass a
+decoded PIL image via `state['image']` to the same `MlxPredictor.predict()`
+contract.
 
 CUDA reference on the same tasks is 73.16%; the residual gap is the fla
 chunked delta-rule kernel vs. reference implementations, concentrated on

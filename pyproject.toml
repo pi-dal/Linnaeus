@@ -32,6 +32,9 @@ train = ["pyarrow>=25", "scikit-learn>=1.9", "pandas>=3.0", "datasets>=4"]
 # NVML board telemetry on NVIDIA hosts; without it Sampler still records RSS.
 telemetry = ["nvidia-ml-py>=12"]
 agent = ["bub @ git+https://github.com/bubbuild/bub.git@9bf70488e22a44eeb875a9d55d9a7d352b82e381"]
+# On-device inference on Apple Silicon (macOS + iOS exports). Darwin only —
+# mlx has no Linux wheels for the VLM path; keep it out of the CUDA runtime.
+mlx = ["mlx-lm>=0.31", "mlx-vlm>=0.7; sys_platform == 'darwin'"]
 
 [dependency-groups]
 quality = ["ruff==0.16.8", "ty==0.0.82", "prek>=0.3.1,<1", "pytest>=9,<10"]
