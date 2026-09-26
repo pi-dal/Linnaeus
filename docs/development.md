@@ -17,7 +17,7 @@ mise run build
 ```
 
 `mise run install` installs the runtime, training, agent and telemetry extras,
-and quality tools. For editing documentation only, use `mise run sync-docs`.
+and quality tools. The site lives in `site/` (Nuxt + UnoCSS): `mise run site-preview`.
 Run `mise tasks` to see the available commands.
 
 ## Dependencies

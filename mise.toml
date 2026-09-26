@@ -4,6 +4,8 @@
 [tools]
 python = "3.12"
 uv = "0.11"
+node = "24"
+pnpm = "12"
 
 # --- environment sync -------------------------------------------------------
 # `uv sync` replaces the environment with exactly the requested selection, so
@@ -17,9 +19,9 @@ run = "uv sync --extra train --extra agent --extra telemetry --group quality"
 description = "Install only lint/typecheck tools (no PyTorch; used by the quality CI job)"
 run = "uv sync --no-default-groups --group quality --no-install-project"
 
-[tasks.sync-docs]
-description = "Install only the documentation group (no project or model dependencies)"
-run = "uv sync --no-default-groups --group docs --no-install-project"
+[tasks.site-install]
+description = "Install the Nuxt site dependencies (site/)"
+run = "pnpm -C site install"
 
 # --- project commands -------------------------------------------------------
 # Tasks assume the environment is already synced (mise run install); --no-sync
@@ -55,11 +57,12 @@ run = "uv run --no-sync pytest"
 description = "Build the source distribution and wheel"
 run = "uv build"
 
-[tasks.docs]
-description = "Build the static website with warnings treated as errors"
-run = "uv run --no-sync sphinx-build -b html -W --keep-going -d build/doctrees -c docs . build/site"
+[tasks.site]
+description = "Build the static site (Nuxt SSG → site/.output/public)"
+depends = ["site-install"]
+run = "pnpm -C site generate"
 
-[tasks.docs-preview]
-description = "Build and serve the website on localhost:8000"
-depends = ["docs"]
-run = "python -m http.server 8000 --bind 127.0.0.1 --directory build/site"
+[tasks.site-preview]
+description = "Build and serve the site on localhost:8000"
+depends = ["site"]
+run = "python -m http.server 8000 --bind 127.0.0.1 --directory site/.output/public"

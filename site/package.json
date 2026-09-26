@@ -1,0 +1,23 @@
+{
+  "name": "linnaeus-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxi dev",
+    "generate": "nuxi generate",
+    "build": "nuxi build"
+  },
+  "dependencies": {
+    "@nuxt/content": "^3.6.0",
+    "@unocss/nuxt": "^66.0.0",
+    "nuxt": "^4.1.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "^5.2.0",
+    "@fontsource-variable/inter": "^5.2.0",
+    "@fontsource/ibm-plex-mono": "^5.2.0",
+    "@unocss/preset-web-fonts": "^66.0.0",
+    "better-sqlite3": "^13.0.3"
+  }
+}

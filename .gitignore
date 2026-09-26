@@ -31,3 +31,10 @@ __pycache__/
 *.pt
 *.pth
 *.gguf
+
+# Nuxt site
+site/node_modules/
+site/.nuxt/
+site/.output/
+site/.data/
+site/dist

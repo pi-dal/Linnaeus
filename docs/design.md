@@ -1,14 +1,5 @@
 # Model architecture
 
-```{toctree}
-:hidden:
-
-RLCD <rlcd>
-Compute efficiency <compute-efficiency>
-Data and evaluation <data-and-evaluation>
-Reference protocols <upstream-alignment>
-Benchmarking <local-benchmarks>
-```
 
 Linnaeus accepts a state and independent questions and returns temperature-scaled
 probabilities over supplied candidates. The training and serving templates are

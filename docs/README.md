@@ -26,13 +26,3 @@ cover the prediction interface and known failure cases.
 
 For contributors, see [Development](development.md) and [Build the website](website.md).
 
-```{toctree}
-:hidden:
-
-Installation and inference <inference>
-Agent integration <bub-agent>
-Training and evaluation <run-experiment>
-Development <development>
-Build the website <website>
-OpenBayes deployment <openbayes>
-```

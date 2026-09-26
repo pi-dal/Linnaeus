@@ -1,0 +1,8 @@
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+html { background: #F7F5EE; color: #1A2B1E; }
+body { -webkit-font-smoothing: antialiased; }
+::selection { background: #4A7C59; color: #F7F5EE; }

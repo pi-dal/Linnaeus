@@ -3,32 +3,20 @@ name: Website
 on:
   pull_request:
     paths:
-      - "index.md"
-      - "README.md"
-      - "MODEL_CARD.md"
+      - "site/**"
       - "docs/**"
-      - "results/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "mise.toml"
-      - ".python-version"
-      - "LICENSE"
-      - "NOTICE"
+      - "README.md"
+      - "PRODUCT.md"
+      - "DESIGN.md"
       - ".github/workflows/website.yml"
   push:
     branches: [main]
     paths:
-      - "index.md"
-      - "README.md"
-      - "MODEL_CARD.md"
+      - "site/**"
       - "docs/**"
-      - "results/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "mise.toml"
-      - ".python-version"
-      - "LICENSE"
-      - "NOTICE"
+      - "README.md"
+      - "PRODUCT.md"
+      - "DESIGN.md"
       - ".github/workflows/website.yml"
   workflow_dispatch:
 
@@ -41,11 +29,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v3
-      - run: mise run sync-docs
-      - run: mise run docs
+      - run: mise run site
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: build/site
+          path: site/.output/public
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
