@@ -20,6 +20,7 @@
 - [Data and evaluation](data-and-evaluation.md): datasets, partitions, and quality metrics.
 - [Reference protocols](upstream-alignment.md): Laya and Laya Vision checkpoints and comparison scope.
 - [Benchmarking](local-benchmarks.md): latency, resource measurements, JevBench, and figure generation.
+- [JevBench submission](jevbench-submission.md): preregistered endpoint conditions, cost basis, and overlap statement.
 
 The [behavior and regression tests](design.md#behavior-and-regression-tests)
 cover the prediction interface and known failure cases.

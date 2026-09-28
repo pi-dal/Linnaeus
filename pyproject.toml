@@ -35,10 +35,16 @@ agent = ["bub @ git+https://github.com/bubbuild/bub.git@9bf70488e22a44eeb875a9d5
 # On-device inference on Apple Silicon (macOS + iOS exports). Darwin only —
 # mlx has no Linux wheels for the VLM path; keep it out of the CUDA runtime.
 mlx = ["mlx-lm>=0.31", "mlx-vlm>=0.7; sys_platform == 'darwin'"]
+# TypeSafe-compatible HTTP server (JevBench submissions run the author's
+# own server on the operator's GPU pods).
+serve = ["fastapi>=0.115", "uvicorn>=0.30"]
 
 [dependency-groups]
 quality = ["ruff==0.16.8", "ty==0.0.82", "prek>=0.3.1,<1", "pytest>=9,<10"]
 plot = ["matplotlib==3.11.2", "numpy==2.5.3"]
+
+[project.scripts]
+linnaeus-serve = "linnaeus.server:main"
 
 [project.urls]
 Models = "https://huggingface.co/pi-dal/Linnaeus-0.1.0-2B"
