@@ -12,8 +12,8 @@ pnpm = "12"
 # each sync task is a complete, standalone install for its purpose.
 
 [tasks.install]
-description = "Install locked runtime, training, agent, telemetry, and quality dependencies"
-run = "uv sync --extra train --extra agent --extra telemetry --group quality"
+description = "Install locked runtime, training, agent, telemetry, serve, and quality dependencies"
+run = "uv sync --extra train --extra agent --extra telemetry --extra serve --group quality"
 
 [tasks.sync-quality]
 description = "Install only lint/typecheck tools (no PyTorch; used by the quality CI job)"

@@ -16,8 +16,10 @@ Run:
     linnaeus-serve --checkpoint pi-dal/Linnaeus-0.1.0-2B --port 8700
 """
 
-from __future__ import annotations
-
+# Deliberately no `from __future__ import annotations`: FastAPI resolves route
+# annotations against this module's globals, so `Request` — imported inside
+# `create_app` to keep fastapi an optional `serve` extra — has to stay a real
+# object in the signature. Stringified annotations made the app fail to start.
 import argparse
 import base64
 import io
@@ -50,6 +52,9 @@ def _decode_state(state: Any):
 def create_app(checkpoint: str = DEFAULT_CHECKPOINT, model_id: str = DEFAULT_MODEL_ID):
     from fastapi import FastAPI, Request
     from fastapi.responses import JSONResponse
+
+    # `Request` is a function-local name, so the signature below has to be
+    # evaluated eagerly (see the module-level note about PEP 563).
 
     global _predictor, _model_id
     _predictor = Predictor.from_checkpoint(checkpoint)
